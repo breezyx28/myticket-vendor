@@ -3,6 +3,7 @@ import type { AcknowledgementResponse } from '@/api/types/auth';
 import type { Id } from '@/api/types/common';
 import { unwrapData } from '@/api/types/common';
 import type {
+  AddVendorCategoryRequest,
   CreateVendorApplicationRequest,
   MyRoleApplications,
   RoleApplicationDetail,
@@ -10,6 +11,7 @@ import type {
   RoleApplicationKind,
   RoleApplicationSummary,
   UpdateVendorApplicationRequest,
+  VendorApplicationCategory,
   VendorApplicationDocument,
   VendorApplicationDocumentUpload,
   VendorApplicationGalleryItem,
@@ -123,6 +125,22 @@ export const roleApplicationsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['RoleApplication'],
     }),
+    addVendorCategory: build.mutation<
+      VendorApplicationCategory,
+      { id: Id; body: AddVendorCategoryRequest }
+    >({
+      query: ({ id, body }) => ({ url: `/${VENDOR}/${id}/categories`, method: 'POST', body }),
+      transformResponse: (raw: VendorApplicationCategory | { data: VendorApplicationCategory }) =>
+        unwrapData(raw) ?? (raw as VendorApplicationCategory),
+      invalidatesTags: ['RoleApplication'],
+    }),
+    deleteVendorCategory: build.mutation<AcknowledgementResponse, { id: Id; rowId: Id }>({
+      query: ({ id, rowId }) => ({
+        url: `/${VENDOR}/${id}/categories/${rowId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['RoleApplication'],
+    }),
   }),
 });
 
@@ -139,4 +157,6 @@ export const {
   useDeleteVendorDocumentMutation,
   useAddVendorGalleryItemMutation,
   useDeleteVendorGalleryItemMutation,
+  useAddVendorCategoryMutation,
+  useDeleteVendorCategoryMutation,
 } = roleApplicationsApi;

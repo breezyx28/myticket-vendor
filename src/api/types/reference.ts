@@ -19,3 +19,17 @@ export interface SaudiRegionRef {
 export interface SaudiRegionsResponse {
   data: SaudiRegionRef[];
 }
+
+/** `GET /reference/vendor-service-categories`. */
+export interface VendorServiceCategory {
+  id: number;
+  slug: string;
+  name_en: string;
+  name_ar: string;
+  is_active: boolean;
+  display_order: number;
+}
+
+export interface VendorServiceCategoriesResponse {
+  data: VendorServiceCategory[];
+}

@@ -5,24 +5,28 @@ import { TextArea } from '@/components/forms/TextArea';
 import { TextInput } from '@/components/forms/TextInput';
 import { ApplicationStatusBanner } from '@/components/vendor/ApplicationStatusBanner';
 import {
+  useAddVendorCategoryMutation,
   useAddVendorDocumentMutation,
   useAddVendorGalleryItemMutation,
   useCreateVendorApplicationMutation,
+  useDeleteVendorCategoryMutation,
   useDeleteVendorDocumentMutation,
   useDeleteVendorGalleryItemMutation,
   useGetMyRoleApplicationsQuery,
   useGetRoleApplicationQuery,
   useGetSaudiRegionsQuery,
+  useGetVendorServiceCategoriesQuery,
   useSubmitVendorApplicationMutation,
   useUpdateVendorApplicationMutation,
 } from '@/api/endpoints';
+import type { VendorServiceCategory } from '@/api/types/reference';
 import {
   isVendorApplicationReady,
   VENDOR_BIO_MAX_CHARS,
 } from '@/lib/onboardingValidation';
-import { readApiErrorMessage } from '@/lib/apiErrors';
+import { readApiErrorMessage, readApiFieldErrors } from '@/lib/apiErrors';
 import { uploadToCdn } from '@/lib/upload';
-import { VENDOR_SERVICE_CATEGORIES } from '@/lib/vendorServiceCategories';
+import { vendorCategoryLabel } from '@/lib/vendorCategoryLabel';
 import {
   createVendorApplicationSchema,
   vendorApplicationPatchSchema,
@@ -60,6 +64,8 @@ export function ApplicationWizardPage() {
 
   const { data: regionsData } = useGetSaudiRegionsQuery();
   const regions = regionsData?.data ?? [];
+  const { data: serviceCategories = [], isLoading: loadingCategories } =
+    useGetVendorServiceCategoriesQuery();
 
   const [createApplication] = useCreateVendorApplicationMutation();
   const [updateApplication] = useUpdateVendorApplicationMutation();
@@ -68,11 +74,13 @@ export function ApplicationWizardPage() {
   const [deleteDocument] = useDeleteVendorDocumentMutation();
   const [addGalleryItem] = useAddVendorGalleryItemMutation();
   const [deleteGalleryItem] = useDeleteVendorGalleryItemMutation();
+  const [addCategory] = useAddVendorCategoryMutation();
+  const [deleteCategory] = useDeleteVendorCategoryMutation();
 
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [uploading, setUploading] = useState(false);
+  const [categorySaving, setCategorySaving] = useState(false);
   const [localAppId, setLocalAppId] = useState<string | number | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [docLabel, setDocLabel] = useState('');
   const [docUrl, setDocUrl] = useState('');
 
@@ -184,6 +192,11 @@ export function ApplicationWizardPage() {
   async function onServicesNext() {
     const valid = await servicesForm.trigger();
     if (!valid || !effectiveId) return;
+    const categoryCount = detail?.vendor_application?.categories?.length ?? 0;
+    if (categoryCount === 0) {
+      toast.error(t('application.categoriesRequired'));
+      return;
+    }
     const values = servicesForm.getValues();
     await persistPatch({
       business_name: values.business_name || identityForm.getValues('profile_name'),
@@ -194,11 +207,33 @@ export function ApplicationWizardPage() {
     goToStep(2);
   }
 
+  async function toggleCategory(category: VendorServiceCategory) {
+    if (!effectiveId) return;
+    const applicationCategories = detail?.vendor_application?.categories ?? [];
+    const existing = applicationCategories.find(
+      (item) => item.slug === category.slug || item.service_category_id === category.id,
+    );
+
+    setCategorySaving(true);
+    try {
+      if (existing) {
+        await deleteCategory({ id: effectiveId, rowId: existing.id }).unwrap();
+      } else {
+        await addCategory({ id: effectiveId, body: { slug: category.slug } }).unwrap();
+      }
+      void refetchDetail();
+    } catch (err) {
+      toast.error(readApiErrorMessage(err, t('common.error')));
+    } finally {
+      setCategorySaving(false);
+    }
+  }
+
   async function onDocumentUpload(file: File, kind: 'document' | 'url' = 'document') {
     if (!effectiveId) return;
     setUploading(true);
     try {
-      const { url } = await uploadToCdn(file);
+      const { url } = await uploadToCdn(file, 'vendor_document');
       await addDocument({
         id: effectiveId,
         body: {
@@ -243,7 +278,7 @@ export function ApplicationWizardPage() {
     if (!effectiveId) return;
     setUploading(true);
     try {
-      const { url } = await uploadToCdn(file);
+      const { url } = await uploadToCdn(file, 'vendor_application');
       await addGalleryItem({
         id: effectiveId,
         body: {
@@ -271,6 +306,20 @@ export function ApplicationWizardPage() {
       await submitApplication({ id: effectiveId }).unwrap();
       navigate('/application/status', { replace: true });
     } catch (err) {
+      const fieldErrors = readApiFieldErrors(err);
+      const keys = Object.keys(fieldErrors);
+      if (keys.length > 0) {
+        const summary = keys.flatMap((key) => fieldErrors[key]).join(' ');
+        toast.error(summary || readApiErrorMessage(err, t('common.error')));
+        if (fieldErrors.bio || fieldErrors.profile_name || fieldErrors.contact_email) {
+          goToStep(0);
+        } else if (fieldErrors.categories) {
+          goToStep(1);
+        } else if (fieldErrors.documents || fieldErrors.gallery) {
+          goToStep(2);
+        }
+        return;
+      }
       toast.error(readApiErrorMessage(err, t('common.error')));
     }
   }
@@ -289,6 +338,7 @@ export function ApplicationWizardPage() {
 
   const documents = detail?.vendor_application?.documents ?? [];
   const gallery = detail?.vendor_application?.gallery ?? [];
+  const applicationCategories = detail?.vendor_application?.categories ?? [];
   const readyForSubmit = detail ? isVendorApplicationReady(detail as VendorApplicationDetail) : false;
   const isAr = i18n.language === 'ar';
 
@@ -363,25 +413,28 @@ export function ApplicationWizardPage() {
             </Field>
             <div>
               <p className="mb-2 text-[14px] font-semibold text-ink">{t('application.serviceCategories')}</p>
-              <div className="flex flex-wrap gap-2">
-                {VENDOR_SERVICE_CATEGORIES.map((cat) => {
-                  const selected = selectedCategories.includes(cat.slug);
-                  return (
-                    <button
-                      key={cat.slug}
-                      type="button"
-                      onClick={() =>
-                        setSelectedCategories((prev) =>
-                          selected ? prev.filter((s) => s !== cat.slug) : [...prev, cat.slug],
-                        )
-                      }
-                      className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${selected ? 'bg-ink text-white' : 'border border-ink-10 bg-white text-ink-60'}`}
-                    >
-                      {isAr ? cat.nameAr : cat.nameEn}
-                    </button>
-                  );
-                })}
-              </div>
+              {loadingCategories ? (
+                <p className="text-[12px] text-ink-40">{t('common.loading')}</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {serviceCategories.map((cat) => {
+                    const selected = applicationCategories.some(
+                      (item) => item.slug === cat.slug || item.service_category_id === cat.id,
+                    );
+                    return (
+                      <button
+                        key={cat.slug}
+                        type="button"
+                        disabled={categorySaving || !effectiveId}
+                        onClick={() => void toggleCategory(cat)}
+                        className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${selected ? 'bg-ink text-white' : 'border border-ink-10 bg-white text-ink-60'}`}
+                      >
+                        {vendorCategoryLabel(cat, isAr)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
               <p className="mt-2 text-[11px] text-ink-40">{t('application.categoriesNote')}</p>
             </div>
             <div className="flex gap-3">
@@ -508,7 +561,8 @@ export function ApplicationWizardPage() {
               </p>
               <p className="mt-2 line-clamp-3">{identityForm.getValues('bio')}</p>
               <p className="mt-2 text-[12px]">
-                {documents.length} {t('application.documents')} · {gallery.length} {t('application.gallery')}
+                {applicationCategories.length} {t('application.serviceCategories')} · {documents.length}{' '}
+                {t('application.documents')} · {gallery.length} {t('application.gallery')}
               </p>
             </div>
             {!readyForSubmit ? (

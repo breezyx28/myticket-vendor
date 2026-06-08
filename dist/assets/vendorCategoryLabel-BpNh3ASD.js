@@ -1,0 +1,1 @@
+function e(e){let t=new Map;for(let n of e)t.set(n.id,n);return t}function t(e,n,r){if(n&&e.name_ar)return e.name_ar;if(e.name_en)return e.name_en;if(e.slug)return e.slug.replace(/_/g,` `);if(e.service_category_id!=null&&r){let i=r.get(e.service_category_id);if(i)return t(i,n)}return e.service_category_id==null?`—`:`#${e.service_category_id}`}export{t as n,e as t};

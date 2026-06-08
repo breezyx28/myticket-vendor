@@ -1,0 +1,1 @@
+function e(e,t){if(e&&typeof e==`object`){let t=e.data;if(t&&typeof t==`object`){let e=t.message;if(typeof e==`string`&&e.trim())return e;let n=t.errors;if(n){let e=Object.values(n).flat()[0];if(e)return e}}}return t}function t(e){if(e&&typeof e==`object`){let t=e.data;if(t&&typeof t==`object`){let e=t.errors;if(e&&typeof e==`object`)return e}}return{}}export{t as n,e as t};

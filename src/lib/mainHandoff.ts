@@ -42,7 +42,7 @@ export function readMainHandoff(searchParams: URLSearchParams) {
   const source = searchParams.get('source');
   const nested = nestedRedirectParams(searchParams.get('redirect'));
 
-  let email = emailFromQuery ?? parseHandoffEmail(nested?.get('email') ?? null);
+  const email = emailFromQuery ?? parseHandoffEmail(nested?.get('email') ?? null);
   const fromMainWebsite =
     isMainWebsiteHandoff(source) || isMainWebsiteHandoff(nested?.get('source') ?? null);
 

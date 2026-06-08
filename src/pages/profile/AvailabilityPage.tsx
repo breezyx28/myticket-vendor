@@ -1,13 +1,28 @@
 import { AvailabilityToggle } from '@/components/vendor/AvailabilityToggle';
-import { useGetVendorProfileQuery } from '@/api/endpoints';
+import {
+  useGetVendorAvailabilityQuery,
+  useSetVendorAvailabilityMutation,
+} from '@/api/endpoints';
+import { readApiErrorMessage } from '@/lib/apiErrors';
 import type { VendorAvailability } from '@/types/domain';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 export function AvailabilityPage() {
   const { t } = useTranslation();
-  const { data: profile, isLoading } = useGetVendorProfileQuery();
+  const { data: availability, isLoading } = useGetVendorAvailabilityQuery();
+  const [setAvailability, { isLoading: saving }] = useSetVendorAvailabilityMutation();
 
-  const status: VendorAvailability = profile?.availability_status ?? 'available';
+  const status: VendorAvailability = availability?.status ?? 'available';
+
+  async function onChange(next: VendorAvailability) {
+    try {
+      await setAvailability({ status: next }).unwrap();
+      toast.success(t('common.saved'));
+    } catch (err) {
+      toast.error(readApiErrorMessage(err, t('common.error')));
+    }
+  }
 
   return (
     <div className="max-w-xl space-y-6">
@@ -22,9 +37,13 @@ export function AvailabilityPage() {
         {isLoading ? (
           <p className="text-[14px] text-ink-60">{t('common.loading')}</p>
         ) : (
-          <AvailabilityToggle status={status} readOnly />
+          <AvailabilityToggle
+            status={status}
+            onChange={(next) => void onChange(next)}
+            disabled={saving}
+          />
         )}
-        <p className="mt-4 text-[12px] text-ink-40">{t('availability.readOnlyNote')}</p>
+        <p className="mt-4 text-[12px] text-ink-40">{t('availability.engagementHint')}</p>
       </div>
     </div>
   );

@@ -68,7 +68,8 @@
     "uploadGallery": "Upload photos",
     "document_required": "At least one verification document is required.",
     "gallery_required": "Add photos of your past work or equipment.",
-    "incomplete": "Please complete all required fields before submitting."
+    "incomplete": "Please complete all required fields before submitting.",
+    "categoriesRequired": "Select at least one service category to continue."
   },
   "profile": {
     "title": "Your profile",
@@ -87,7 +88,7 @@
     "reserved": "Reserved",
     "availableHint": "Organizers can discover and contact you in the marketplace.",
     "reservedHint": "You appear as booked. Switch back when you're open to new requests.",
-    "readOnlyNote": "Availability updates from the API are coming soon. Your current status is shown below."
+    "engagementHint": "Accepting an engagement automatically sets your status to reserved. Completing or cancelling returns you to available."
   },
   "engagements": {
     "title": "Engagements",

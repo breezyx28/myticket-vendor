@@ -4,7 +4,11 @@ import { SectionSkeleton } from '@/components/ui/SectionSkeleton';
 import { AvailabilityToggle } from '@/components/vendor/AvailabilityToggle';
 import { StatBubble } from '@/components/vendor/StatBubble';
 import { StatusPill } from '@/components/vendor/StatusPill';
-import { useGetVendorProfileQuery, useListEngagementsQuery } from '@/api/endpoints';
+import {
+  useGetVendorAvailabilityQuery,
+  useGetVendorProfileQuery,
+  useListEngagementsQuery,
+} from '@/api/endpoints';
 import { ENV } from '@/config/env';
 import { CalendarCheck, MessageSquare, Star, Ticket } from 'lucide-react';
 import { useMemo } from 'react';
@@ -14,6 +18,7 @@ import { Link } from 'react-router-dom';
 export function HomePage() {
   const { t } = useTranslation();
   const { data: profile, isLoading: profileLoading } = useGetVendorProfileQuery();
+  const { data: availability } = useGetVendorAvailabilityQuery();
   const { data: engagements, isLoading: engagementsLoading } = useListEngagementsQuery({
     page: 1,
     per_page: 50,
@@ -75,7 +80,7 @@ export function HomePage() {
           label={t('availability.title')}
           value={
             <AvailabilityToggle
-              status={profile?.availability_status ?? 'available'}
+              status={availability?.status ?? profile?.availability_status ?? 'available'}
               readOnly
             />
           }

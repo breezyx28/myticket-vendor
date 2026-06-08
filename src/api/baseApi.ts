@@ -21,9 +21,11 @@ export const apiTagTypes = [
   'Session',
   'RoleApplication',
   'VendorProfile',
+  'VendorAvailability',
   'Engagement',
   'Rating',
   'SaudiRegion',
+  'VendorServiceCategory',
   'Preferences',
 ] as const;
 

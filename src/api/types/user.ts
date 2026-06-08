@@ -1,4 +1,5 @@
 import type { Id, Iso8601 } from '@/api/types/common';
+import type { VendorAvailability } from '@/types/domain';
 
 export interface UserMe {
   id: Id;
@@ -43,5 +44,14 @@ export interface UpdateUserPreferencesRequest {
   push_notifications?: boolean;
   sms_notifications?: boolean;
   marketing_emails?: boolean;
+}
+
+export interface VendorAvailabilityResponse {
+  status: VendorAvailability;
+  [key: string]: unknown;
+}
+
+export interface UpdateVendorAvailabilityRequest {
+  status: VendorAvailability;
 }
 

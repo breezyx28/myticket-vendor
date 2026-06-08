@@ -7,8 +7,10 @@ import { TextInput } from '@/components/forms/TextInput';
 import {
   useGetSaudiRegionsQuery,
   useGetVendorProfileQuery,
+  useGetVendorServiceCategoriesQuery,
   useUpdateVendorProfileMutation,
 } from '@/api/endpoints';
+import { buildVendorCategoryRefMap, vendorCategoryLabel } from '@/lib/vendorCategoryLabel';
 import { ENV } from '@/config/env';
 import { readApiErrorMessage } from '@/lib/apiErrors';
 import { updateVendorProfileSchema, type UpdateVendorProfileSchema } from '@/schemas/profile';
@@ -19,9 +21,15 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 export function ProfilePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: profile, isLoading: profileLoading } = useGetVendorProfileQuery();
   const { data: regionsData } = useGetSaudiRegionsQuery();
+  const { data: serviceCategories = [] } = useGetVendorServiceCategoriesQuery();
+  const categoryRefMap = useMemo(
+    () => buildVendorCategoryRefMap(serviceCategories),
+    [serviceCategories],
+  );
+  const isAr = i18n.language === 'ar';
   const [updateProfile, { isLoading }] = useUpdateVendorProfileMutation();
 
   const {
@@ -141,7 +149,7 @@ export function ProfilePage() {
             {regionLabel ? <p className="mt-2">{regionLabel}</p> : null}
             {profile.categories?.map((c) => (
               <Badge key={c.id} className="mt-2 me-2">
-                #{c.service_category_id}
+                {vendorCategoryLabel(c, isAr, categoryRefMap)}
               </Badge>
             ))}
           </div>

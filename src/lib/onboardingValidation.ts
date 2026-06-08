@@ -16,6 +16,7 @@ export function isVendorApplicationReady(app: VendorApplicationDetail): boolean 
     Boolean(v.contact_email?.trim()) &&
     (v.bio?.trim().length ?? 0) >= VENDOR_BIO_MIN_CHARS &&
     (v.documents?.length ?? 0) > 0 &&
-    (v.gallery?.length ?? 0) > 0
+    (v.gallery?.length ?? 0) > 0 &&
+    (v.categories?.length ?? 0) > 0
   );
 }

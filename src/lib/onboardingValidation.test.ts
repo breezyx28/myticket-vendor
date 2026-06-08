@@ -13,6 +13,7 @@ function baseApp(overrides: Partial<VendorApplicationDetail['vendor_application'
       bio: 'We cater weddings and corporate events across Riyadh.',
       documents: [{ id: 1, kind: 'document', value: 'https://cdn.example.com/license.pdf', label: null, position: 0 }],
       gallery: [{ id: 1, image_url: 'https://cdn.example.com/booth.jpg', caption: null, position: 0 }],
+      categories: [{ id: 1, service_category_id: 1, slug: 'catering', name_en: 'Catering', name_ar: 'تموين' }],
       ...overrides,
     },
   };
@@ -45,5 +46,9 @@ describe('isVendorApplicationReady', () => {
 
   it('returns false without contact email', () => {
     expect(isVendorApplicationReady(baseApp({ contact_email: '' }))).toBe(false);
+  });
+
+  it('returns false without categories', () => {
+    expect(isVendorApplicationReady(baseApp({ categories: [] }))).toBe(false);
   });
 });

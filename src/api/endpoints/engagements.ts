@@ -8,6 +8,10 @@ import type {
   PostEngagementMessageRequest,
 } from '@/api/types/engagement';
 
+function engagementMessagesTag(id: Id) {
+  return { type: 'Engagement' as const, id: `${id}-messages` };
+}
+
 export const engagementsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     listEngagements: build.query<Paginated<Engagement>, PaginationQuery | void>({
@@ -20,6 +24,16 @@ export const engagementsApi = baseApi.injectEndpoints({
             ]
           : [{ type: 'Engagement' as const, id: 'LIST' }],
     }),
+    listEngagementMessages: build.query<EngagementMessage[], { id: Id }>({
+      query: ({ id }) => ({ url: `/me/engagements/${id}/messages` }),
+      transformResponse: (raw: EngagementMessage[] | { data: EngagementMessage[] }) => {
+        const data = unwrapData(raw);
+        if (Array.isArray(data)) return data;
+        if (Array.isArray(raw)) return raw;
+        return [];
+      },
+      providesTags: (_res, _err, arg) => [engagementMessagesTag(arg.id)],
+    }),
     acceptEngagement: build.mutation<Engagement, { id: Id }>({
       query: ({ id }) => ({ url: `/me/engagements/${id}/accept`, method: 'POST' }),
       transformResponse: (raw: Engagement | { data: Engagement }) =>
@@ -27,6 +41,8 @@ export const engagementsApi = baseApi.injectEndpoints({
       invalidatesTags: (_res, _err, arg) => [
         { type: 'Engagement', id: arg.id },
         { type: 'Engagement', id: 'LIST' },
+        engagementMessagesTag(arg.id),
+        'VendorAvailability',
         'VendorProfile',
       ],
     }),
@@ -41,6 +57,7 @@ export const engagementsApi = baseApi.injectEndpoints({
       invalidatesTags: (_res, _err, arg) => [
         { type: 'Engagement', id: arg.id },
         { type: 'Engagement', id: 'LIST' },
+        engagementMessagesTag(arg.id),
       ],
     }),
     postEngagementMessage: build.mutation<
@@ -54,7 +71,11 @@ export const engagementsApi = baseApi.injectEndpoints({
       }),
       transformResponse: (raw: EngagementMessage | { data: EngagementMessage }) =>
         unwrapData(raw) ?? (raw as EngagementMessage),
-      invalidatesTags: (_res, _err, arg) => [{ type: 'Engagement', id: arg.id }],
+      invalidatesTags: (_res, _err, arg) => [
+        { type: 'Engagement', id: arg.id },
+        { type: 'Engagement', id: 'LIST' },
+        engagementMessagesTag(arg.id),
+      ],
       async onQueryStarted({ id, body }, { dispatch, queryFulfilled }) {
         const listArgs = { page: 1, per_page: 50 } as const;
         const patch = dispatch(
@@ -99,6 +120,9 @@ export const engagementsApi = baseApi.injectEndpoints({
       invalidatesTags: (_res, _err, arg) => [
         { type: 'Engagement', id: arg.id },
         { type: 'Engagement', id: 'LIST' },
+        engagementMessagesTag(arg.id),
+        'VendorAvailability',
+        'VendorProfile',
       ],
     }),
   }),
@@ -106,6 +130,7 @@ export const engagementsApi = baseApi.injectEndpoints({
 
 export const {
   useListEngagementsQuery,
+  useListEngagementMessagesQuery,
   useAcceptEngagementMutation,
   useDeclineEngagementMutation,
   usePostEngagementMessageMutation,

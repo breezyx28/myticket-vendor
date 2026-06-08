@@ -5,9 +5,11 @@ import type { Vendor } from '@/api/types/vendor';
 import type { UpdateVendorProfileRequest } from '@/api/types/vendor';
 import type {
   UpdateUserPreferencesRequest,
+  UpdateVendorAvailabilityRequest,
   UserMe,
   UserPreferences,
   UserPreferencesResponse,
+  VendorAvailabilityResponse,
 } from '@/api/types/user';
 
 function unwrapUserMeResponse(response: unknown): UserMe {
@@ -41,6 +43,14 @@ export const meApi = baseApi.injectEndpoints({
           : (raw as UserPreferences),
       invalidatesTags: ['Preferences', 'Me'],
     }),
+    getVendorAvailability: build.query<VendorAvailabilityResponse, void>({
+      query: () => ({ url: '/me/vendor-availability' }),
+      providesTags: ['VendorAvailability'],
+    }),
+    setVendorAvailability: build.mutation<VendorAvailabilityResponse, UpdateVendorAvailabilityRequest>({
+      query: (body) => ({ url: '/me/vendor-availability', method: 'PUT', body }),
+      invalidatesTags: ['VendorAvailability', 'VendorProfile'],
+    }),
     getVendorProfile: build.query<Vendor, void>({
       query: () => ({ url: '/me/vendor-profile' }),
       transformResponse: (response: unknown) => unwrapData(response as Vendor | { data: Vendor })!,
@@ -59,6 +69,8 @@ export const {
   useLazyGetMeQuery,
   useGetPreferencesQuery,
   useUpdatePreferencesMutation,
+  useGetVendorAvailabilityQuery,
+  useSetVendorAvailabilityMutation,
   useGetVendorProfileQuery,
   useUpdateVendorProfileMutation,
 } = meApi;

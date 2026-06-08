@@ -2,14 +2,22 @@ import { SectionSkeleton } from '@/components/ui/SectionSkeleton';
 import { AvailabilityToggle } from '@/components/vendor/AvailabilityToggle';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { useGetVendorProfileQuery } from '@/api/endpoints';
+import { useGetVendorProfileQuery, useGetVendorServiceCategoriesQuery } from '@/api/endpoints';
+import { buildVendorCategoryRefMap, vendorCategoryLabel } from '@/lib/vendorCategoryLabel';
 import { ENV } from '@/config/env';
 import { ExternalLink, Star } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export function PublicProfilePreviewPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: profile, isLoading } = useGetVendorProfileQuery();
+  const { data: serviceCategories = [] } = useGetVendorServiceCategoriesQuery();
+  const categoryRefMap = useMemo(
+    () => buildVendorCategoryRefMap(serviceCategories),
+    [serviceCategories],
+  );
+  const isAr = i18n.language === 'ar';
 
   if (isLoading || !profile) {
     return <SectionSkeleton rows={2} />;
@@ -57,7 +65,7 @@ export function PublicProfilePreviewPage() {
             <div className="mt-4 flex flex-wrap gap-2">
               {profile.categories?.map((c) => (
                 <Badge key={c.id} variant="success">
-                  #{c.service_category_id}
+                  {vendorCategoryLabel(c, isAr, categoryRefMap)}
                 </Badge>
               ))}
             </div>

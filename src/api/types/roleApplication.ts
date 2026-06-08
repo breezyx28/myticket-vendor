@@ -68,6 +68,21 @@ export interface VendorApplicationGalleryUpload {
   position?: number;
 }
 
+export interface VendorApplicationCategory {
+  id: Id;
+  vendor_application_id?: Id;
+  service_category_id: number;
+  slug?: string;
+  name_en?: string;
+  name_ar?: string;
+  [key: string]: unknown;
+}
+
+export interface AddVendorCategoryRequest {
+  slug?: string;
+  service_category_id?: number;
+}
+
 export interface RoleApplicationVendorDetail {
   id: Id;
   profile_name?: string | null;
@@ -79,6 +94,7 @@ export interface RoleApplicationVendorDetail {
   coverage_area?: string | null;
   documents?: VendorApplicationDocument[];
   gallery?: VendorApplicationGalleryItem[];
+  categories?: VendorApplicationCategory[];
   [key: string]: unknown;
 }
 

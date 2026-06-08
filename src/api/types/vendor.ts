@@ -5,6 +5,9 @@ export interface VendorProfileCategory {
   id: number;
   vendor_profile_id: number;
   service_category_id: number;
+  slug?: string;
+  name_en?: string;
+  name_ar?: string;
 }
 
 export interface VendorProfileGalleryItem {

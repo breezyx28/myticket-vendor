@@ -22,6 +22,9 @@ export interface VendorProfileCategory {
   id: number;
   vendor_profile_id: number;
   service_category_id: number;
+  slug?: string;
+  name_en?: string;
+  name_ar?: string;
 }
 
 export interface VendorProfileGalleryItem {
@@ -84,6 +87,13 @@ export interface VendorApplicationDetail {
     coverage_area?: string | null;
     documents?: VendorApplicationDocument[];
     gallery?: VendorApplicationGalleryItem[];
+    categories?: Array<{
+      id: number;
+      service_category_id: number;
+      slug?: string;
+      name_en?: string;
+      name_ar?: string;
+    }>;
   } | null;
 }
 
