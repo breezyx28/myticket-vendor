@@ -1,3 +1,4 @@
+import { SectionSkeleton } from '@/components/ui/SectionSkeleton';
 import { AvailabilityToggle } from '@/components/vendor/AvailabilityToggle';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -8,9 +9,11 @@ import { useTranslation } from 'react-i18next';
 
 export function PublicProfilePreviewPage() {
   const { t } = useTranslation();
-  const { data: profile } = useGetVendorProfileQuery();
+  const { data: profile, isLoading } = useGetVendorProfileQuery();
 
-  if (!profile) return null;
+  if (isLoading || !profile) {
+    return <SectionSkeleton rows={2} />;
+  }
 
   const publicUrl = `${ENV.mainWebsiteUrl}/vendors/${profile.slug}`;
 

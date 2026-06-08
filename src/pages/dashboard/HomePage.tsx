@@ -1,4 +1,6 @@
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SectionSkeleton } from '@/components/ui/SectionSkeleton';
 import { AvailabilityToggle } from '@/components/vendor/AvailabilityToggle';
 import { StatBubble } from '@/components/vendor/StatBubble';
 import { StatusPill } from '@/components/vendor/StatusPill';
@@ -11,8 +13,11 @@ import { Link } from 'react-router-dom';
 
 export function HomePage() {
   const { t } = useTranslation();
-  const { data: profile } = useGetVendorProfileQuery();
-  const { data: engagements } = useListEngagementsQuery({ page: 1, per_page: 50 });
+  const { data: profile, isLoading: profileLoading } = useGetVendorProfileQuery();
+  const { data: engagements, isLoading: engagementsLoading } = useListEngagementsQuery({
+    page: 1,
+    per_page: 50,
+  });
 
   const pendingCount = useMemo(
     () => (engagements?.data ?? []).filter((e) => e.status === 'pending').length,
@@ -27,13 +32,17 @@ export function HomePage() {
     [engagements],
   );
 
+  if (profileLoading || engagementsLoading) {
+    return <SectionSkeleton />;
+  }
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-[32px] font-extrabold tracking-tight text-ink">
           {profile?.business_name ?? t('nav.home')}
         </h1>
-        <p className="mt-2 text-[14px] text-ink-60">{t('nav.home')}</p>
+        <p className="mt-2 text-[14px] text-ink-60">{t('dashboard.welcome')}</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -97,9 +106,19 @@ export function HomePage() {
       </div>
 
       <section className="rounded-3xl border border-ink-10 bg-white p-6 shadow-card-sm">
-        <h2 className="text-lg font-extrabold text-ink">{t('engagements.title')}</h2>
+        <h2 className="text-lg font-extrabold text-ink">{t('dashboard.recentEngagements')}</h2>
         {recent.length === 0 ? (
-          <p className="mt-4 text-[14px] text-ink-40">{t('engagements.empty')}</p>
+          <EmptyState
+            className="mt-4"
+            title={t('engagements.empty')}
+            action={
+              <Link to="/engagements">
+                <Button variant="outline" size="sm">
+                  {t('nav.engagements')}
+                </Button>
+              </Link>
+            }
+          />
         ) : (
           <ul className="mt-4 divide-y divide-ink-10">
             {recent.map((e) => (

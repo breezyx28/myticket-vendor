@@ -1,0 +1,1 @@
+import{r as e,t}from"./index.esm-BYAlzR8U.js";var n=t({body:e().trim().min(1,`Message cannot be empty.`).max(4e3,`Message is too long.`).required(`Message is required.`),attachment_url:e().trim().url(`Attachment must be a valid URL.`).notRequired()}).strict(),r=t({reason:e().trim().max(500,`Reason is too long.`).notRequired()}).strict();export{n,r as t};

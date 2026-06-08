@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusPill } from '@/components/vendor/StatusPill';
 import {
   useAcceptEngagementMutation,
@@ -113,9 +114,7 @@ export function EngagementsPage() {
           ) : isError ? (
             <p className="text-[13px] font-medium text-coral">{t('common.error')}</p>
           ) : list.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-ink-20 bg-ink-5/40 px-4 py-8 text-center text-[13px] text-ink-40">
-              {t('engagements.empty')}
-            </p>
+            <EmptyState title={t('engagements.empty')} className="px-4 py-8" />
           ) : (
             <ul className="space-y-2">
               {list.map((e) => (
@@ -169,9 +168,7 @@ export function EngagementsPage() {
               completing={completing}
             />
           ) : (
-            <p className="rounded-xl border border-dashed border-ink-20 bg-ink-5/40 px-4 py-12 text-center text-[14px] text-ink-40">
-              {t('engagements.empty')}
-            </p>
+            <EmptyState title={t('engagements.empty')} className="px-4 py-12" />
           )}
         </section>
       </div>

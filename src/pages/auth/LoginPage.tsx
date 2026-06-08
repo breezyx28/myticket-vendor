@@ -5,17 +5,21 @@ import { useAuth } from '@/hooks/useAuth';
 import { loginSchema, type LoginSchema } from '@/schemas/auth';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { ENV } from '@/config/env';
-import { useState } from 'react';
+import { readMainHandoff } from '@/lib/mainHandoff';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 export function LoginPage() {
   const { user, signIn, signInWithOtp, signInWithOAuth } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: string } | null)?.from ?? '/';
+  const [searchParams] = useSearchParams();
+  const handoff = useMemo(() => readMainHandoff(searchParams), [searchParams]);
+  const legacyFrom = (location.state as { from?: string } | null)?.from;
+  const redirectTo = handoff.redirect !== '/' ? handoff.redirect : legacyFrom ?? '/';
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -23,19 +27,25 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
     getValues,
   } = useForm<LoginSchema>({
     resolver: yupResolver(loginSchema),
-    defaultValues: { email: '', password: '' },
+    defaultValues: { email: handoff.email ?? '', password: '' },
   });
+
+  useEffect(() => {
+    if (!handoff.email) return;
+    reset((prev) => ({ ...prev, email: handoff.email ?? prev.email }));
+  }, [handoff.email, reset]);
 
   const otpForm = useForm<{ otp: string }>({
     defaultValues: { otp: '' },
   });
 
   if (user && (user.role === 'vendor' || user.role === 'guest')) {
-    return <Navigate to={from} replace />;
+    return <Navigate to={redirectTo} replace />;
   }
 
   async function onSubmit(values: LoginSchema) {
@@ -55,7 +65,9 @@ export function LoginPage() {
         setFormError(result.message ?? t('errors.validation'));
         return;
       }
-      navigate(result.redirectTo, { replace: true });
+      navigate(result.redirectTo === '/' && redirectTo !== '/' ? redirectTo : result.redirectTo, {
+        replace: true,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -76,7 +88,9 @@ export function LoginPage() {
         setFormError(result.message ?? t('errors.validation'));
         return;
       }
-      navigate(result.redirectTo, { replace: true });
+      navigate(result.redirectTo === '/' && redirectTo !== '/' ? redirectTo : result.redirectTo, {
+        replace: true,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -86,6 +100,11 @@ export function LoginPage() {
     <div className="mx-auto w-full max-w-md rounded-3xl border border-ink-10 bg-white p-8 shadow-card-lg">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-40">Vendor Dashboard</p>
       <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-ink">{t('auth.loginTitle')}</h1>
+      {handoff.fromMainWebsite ? (
+        <p className="mt-3 rounded-xl border border-sky/30 bg-sky/10 px-4 py-3 text-[13px] text-ink-60">
+          {t('auth.mainHandoffHint')}
+        </p>
+      ) : null}
 
       {challengeToken ? (
         <form

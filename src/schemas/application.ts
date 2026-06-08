@@ -53,7 +53,8 @@ export const vendorApplicationPatchSchema = yup
     coverage_area: yup.string().trim().max(COVERAGE_AREA_MAX).notRequired(),
     internal_note: yup.string().trim().notRequired(),
   })
-  .strict();
+  .strict()
+  .noUnknown(true, 'Use business_name on PATCH, not profile_name.');
 
 export type VendorApplicationPatchSchema = yup.InferType<typeof vendorApplicationPatchSchema>;
 

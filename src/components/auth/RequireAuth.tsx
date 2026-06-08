@@ -1,5 +1,6 @@
 import { getToken } from '@/api/authToken';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
+import { buildLoginUrl } from '@/lib/mainHandoff';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
@@ -11,7 +12,8 @@ export function RequireAuth() {
   const { t } = useTranslation();
 
   if (!token) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    const intended = `${location.pathname}${location.search}`;
+    return <Navigate to={buildLoginUrl(intended)} replace />;
   }
 
   if (isLoading) {

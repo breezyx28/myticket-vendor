@@ -35,7 +35,8 @@
     "resetPassword": "Reset password",
     "accessDeniedTitle": "Access denied",
     "accessDeniedBody": "This dashboard is for vendor applicants and approved service providers only.",
-    "backToMain": "Back to MyTicket"
+    "backToMain": "Back to MyTicket",
+    "mainHandoffHint": "You were redirected from MyTicket. Sign in with the same account to continue your vendor application or dashboard."
   },
   "application": {
     "step_identity": "Business identity",
@@ -102,6 +103,12 @@
     "status_declined": "Declined",
     "status_cancelled": "Cancelled",
     "status_closed": "Closed"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "completedBookings": "Completed bookings",
+    "myTickets": "My tickets",
+    "recentEngagements": "Recent engagements"
   },
   "ratings": {
     "title": "Ratings",

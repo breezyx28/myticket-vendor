@@ -1,3 +1,4 @@
+import { EmptyState } from '@/components/ui/EmptyState';
 import { useGetVendorProfileQuery, useListVendorRatingsQuery } from '@/api/endpoints';
 import { Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -50,9 +51,7 @@ export function RatingsPage() {
       {isLoading ? (
         <p className="text-[14px] text-ink-60">{t('common.loading')}</p>
       ) : ratings.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-ink-20 bg-ink-5/40 px-6 py-10 text-center text-[14px] text-ink-40">
-          {t('ratings.empty')}
-        </p>
+        <EmptyState title={t('ratings.empty')} />
       ) : (
         <ul className="space-y-3">
           {ratings.map((rating) => (

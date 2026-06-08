@@ -35,7 +35,8 @@
     "resetPassword": "إعادة تعيين كلمة المرور",
     "accessDeniedTitle": "الوصول مرفوض",
     "accessDeniedBody": "هذه اللوحة مخصصة لمقدّمي طلبات الموردين ومقدّمي الخدمات المعتمدين فقط.",
-    "backToMain": "العودة إلى MyTicket"
+    "backToMain": "العودة إلى MyTicket",
+    "mainHandoffHint": "تم توجيهك من MyTicket. سجّل الدخول بنفس الحساب لمتابعة طلب المورد أو لوحة التحكم."
   },
   "application": {
     "step_identity": "هوية النشاط",
@@ -102,6 +103,12 @@
     "status_declined": "مرفوض",
     "status_cancelled": "ملغى",
     "status_closed": "مغلق"
+  },
+  "dashboard": {
+    "welcome": "مرحباً بعودتك",
+    "completedBookings": "الحجوزات المكتملة",
+    "myTickets": "تذاكري",
+    "recentEngagements": "أحدث الطلبات"
   },
   "ratings": {
     "title": "التقييمات",
