@@ -1,0 +1,58 @@
+import type { Id, Iso8601 } from '@/api/types/common';
+import type { VendorAvailability } from '@/types/domain';
+
+export interface VendorProfileCategory {
+  id: number;
+  vendor_profile_id: number;
+  service_category_id: number;
+}
+
+export interface VendorProfileGalleryItem {
+  id: number;
+  vendor_profile_id: number;
+  image_url: string;
+  caption: string | null;
+  position: number;
+}
+
+export interface Vendor {
+  id: number;
+  user_id: number;
+  slug: string;
+  business_name: string;
+  bio: string | null;
+  region_id: number | null;
+  city_id: number | null;
+  coverage_area: string | null;
+  profile_image_url: string | null;
+  website_url: string | null;
+  instagram_handle: string | null;
+  availability_status: VendorAvailability;
+  rating_average: string;
+  rating_count: number;
+  completed_bookings: number;
+  is_active: boolean;
+  categories?: VendorProfileCategory[];
+  gallery?: VendorProfileGalleryItem[];
+}
+
+export interface VendorRating {
+  id: Id;
+  user_id: number;
+  target_type: 'vendor';
+  target_id: number;
+  engagement_id: number | null;
+  stars: number;
+  comment: string | null;
+  is_visible: boolean;
+  created_at: Iso8601;
+  updated_at: Iso8601;
+}
+
+export interface UpdateVendorProfileRequest {
+  business_name?: string;
+  bio?: string | null;
+  website_url?: string | null;
+  instagram_handle?: string | null;
+  coverage_area?: string | null;
+}
