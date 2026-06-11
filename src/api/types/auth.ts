@@ -53,3 +53,24 @@ export interface AcknowledgementResponse {
   id?: Id;
   [key: string]: unknown;
 }
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+}
+
+export interface ChangePasswordResponse {
+  ok: true;
+  password_changed_at: Iso8601;
+  [key: string]: unknown;
+}
+
+export interface ChangeEmailRequest {
+  new_email: string;
+  current_password: string;
+}
+
+export interface ChangeEmailResponse {
+  message: string;
+  [key: string]: unknown;
+}

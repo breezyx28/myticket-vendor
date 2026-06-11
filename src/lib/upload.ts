@@ -8,7 +8,11 @@ export interface UploadResult {
   contentType: string;
 }
 
-export type UploadContext = 'vendor_application' | 'vendor_document';
+export type UploadContext =
+  | 'vendor_application'
+  | 'vendor_document'
+  | 'vendor_profile'
+  | 'vendor_profile_gallery';
 
 interface UploadResponseBody {
   url: string;

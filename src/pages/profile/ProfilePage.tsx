@@ -1,36 +1,36 @@
+import { PageHeader, PageShell, SectionCard } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { SectionSkeleton } from '@/components/ui/SectionSkeleton';
-import { Badge } from '@/components/ui/Badge';
+import { FileUploadButton } from '@/components/profile/FileUploadButton';
+import { ProfileAvatar } from '@/components/profile/ProfileAvatar';
 import { Field } from '@/components/forms/Field';
 import { TextArea } from '@/components/forms/TextArea';
 import { TextInput } from '@/components/forms/TextInput';
 import {
   useGetSaudiRegionsQuery,
   useGetVendorProfileQuery,
-  useGetVendorServiceCategoriesQuery,
   useUpdateVendorProfileMutation,
 } from '@/api/endpoints';
-import { buildVendorCategoryRefMap, vendorCategoryLabel } from '@/lib/vendorCategoryLabel';
-import { ENV } from '@/config/env';
-import { readApiErrorMessage } from '@/lib/apiErrors';
+import { useMutationToast } from '@/hooks/useMutationToast';
+import { useVendorProfileUploads } from '@/hooks/useVendorProfileUploads';
+import { ProfileCategoriesSection } from '@/pages/profile/sections/ProfileCategoriesSection';
+import { ProfilePublicLinkSection } from '@/pages/profile/sections/ProfilePublicLinkSection';
 import { updateVendorProfileSchema, type UpdateVendorProfileSchema } from '@/schemas/profile';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 
 export function ProfilePage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { data: profile, isLoading: profileLoading } = useGetVendorProfileQuery();
   const { data: regionsData } = useGetSaudiRegionsQuery();
-  const { data: serviceCategories = [] } = useGetVendorServiceCategoriesQuery();
-  const categoryRefMap = useMemo(
-    () => buildVendorCategoryRefMap(serviceCategories),
-    [serviceCategories],
-  );
-  const isAr = i18n.language === 'ar';
   const [updateProfile, { isLoading }] = useUpdateVendorProfileMutation();
+  const { runMutation } = useMutationToast();
+  const { uploading, uploadProfileImage } = useVendorProfileUploads({
+    galleryCount: profile?.gallery?.length ?? 0,
+  });
 
   const {
     register,
@@ -67,18 +67,15 @@ export function ProfilePage() {
   }, [profile, regionsData]);
 
   async function onSubmit(values: UpdateVendorProfileSchema) {
-    try {
-      await updateProfile({
+    await runMutation(() =>
+      updateProfile({
         business_name: values.business_name ?? undefined,
         bio: values.bio ?? null,
         website_url: values.website_url ?? null,
         instagram_handle: values.instagram_handle ?? null,
         coverage_area: values.coverage_area ?? null,
-      }).unwrap();
-      toast.success(t('common.saved'));
-    } catch (err) {
-      toast.error(readApiErrorMessage(err, t('common.error')));
-    }
+      }).unwrap(),
+    );
   }
 
   if (profileLoading || !profile) {
@@ -86,79 +83,58 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-[28px] font-extrabold text-ink">{t('profile.title')}</h1>
-      </div>
+    <PageShell>
+      <PageHeader title={t('profile.title')} />
 
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <div className="space-y-4">
-          {profile.profile_image_url ? (
-            <img
-              src={profile.profile_image_url}
-              alt=""
-              className="aspect-square w-full rounded-3xl object-cover ring-2 ring-ink-10"
-            />
-          ) : (
-            <div className="flex aspect-square w-full items-center justify-center rounded-3xl bg-ink-5 text-ink-40">
-              —
-            </div>
-          )}
-          <p className="text-[12px] text-ink-40">{t('profile.readOnlyImage')}</p>
-          {profile.gallery && profile.gallery.length > 0 ? (
-            <div className="grid grid-cols-3 gap-2">
-              {profile.gallery.map((item) => (
-                <img
-                  key={item.id}
-                  src={item.image_url}
-                  alt={item.caption ?? ''}
-                  className="aspect-square rounded-xl object-cover"
-                />
-              ))}
-            </div>
-          ) : null}
+          <ProfileAvatar src={profile.profile_image_url} size="lg" />
+          <FileUploadButton
+            label={t('portfolio.uploadImage')}
+            accept="image/*"
+            loading={uploading}
+            onFile={(file) => void uploadProfileImage(file)}
+          />
+          <Link
+            to="/portfolio"
+            className="inline-block text-[13px] font-semibold text-coral transition-colors hover:underline"
+          >
+            {t('portfolio.manageGallery')}
+          </Link>
         </div>
 
-        <form className="space-y-4 rounded-3xl border border-ink-10 bg-white p-6 shadow-card-sm" onSubmit={handleSubmit(onSubmit)}>
-          <Field label={t('profile.businessName')} error={errors.business_name?.message}>
-            <TextInput {...register('business_name')} hasError={Boolean(errors.business_name)} />
-          </Field>
-          <Field label={t('profile.bio')} error={errors.bio?.message}>
-            <TextArea {...register('bio')} rows={5} hasError={Boolean(errors.bio)} />
-          </Field>
-          <Field label={t('profile.website')} error={errors.website_url?.message}>
-            <TextInput {...register('website_url')} dir="ltr" hasError={Boolean(errors.website_url)} />
-          </Field>
-          <Field label={t('profile.instagram')} error={errors.instagram_handle?.message}>
-            <TextInput {...register('instagram_handle')} dir="ltr" hasError={Boolean(errors.instagram_handle)} />
-          </Field>
-          <Field label={t('profile.coverageArea')} error={errors.coverage_area?.message}>
-            <TextInput {...register('coverage_area')} hasError={Boolean(errors.coverage_area)} />
-          </Field>
+        <div className="space-y-6">
+          <SectionCard title={t('profile.businessName')}>
+            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+              <Field label={t('profile.businessName')} error={errors.business_name?.message}>
+                <TextInput {...register('business_name')} hasError={Boolean(errors.business_name)} />
+              </Field>
+              <Field label={t('profile.bio')} error={errors.bio?.message}>
+                <TextArea {...register('bio')} rows={5} hasError={Boolean(errors.bio)} />
+              </Field>
+              <Field label={t('profile.website')} error={errors.website_url?.message}>
+                <TextInput {...register('website_url')} dir="ltr" hasError={Boolean(errors.website_url)} />
+              </Field>
+              <Field label={t('profile.instagram')} error={errors.instagram_handle?.message}>
+                <TextInput
+                  {...register('instagram_handle')}
+                  dir="ltr"
+                  hasError={Boolean(errors.instagram_handle)}
+                />
+              </Field>
+              <Field label={t('profile.coverageArea')} error={errors.coverage_area?.message}>
+                <TextInput {...register('coverage_area')} hasError={Boolean(errors.coverage_area)} />
+              </Field>
+              <Button type="submit" variant="dark" loading={isLoading}>
+                {t('profile.saveChanges')}
+              </Button>
+            </form>
+          </SectionCard>
 
-          <div className="rounded-2xl border border-ink-10 bg-ink-5/40 p-4 text-[13px] text-ink-60">
-            <p className="font-semibold text-ink">{t('profile.publicSlug')}</p>
-            <a
-              href={`${ENV.mainWebsiteUrl}/vendors/${profile.slug}`}
-              className="mt-1 inline-block font-mono text-coral hover:underline"
-              dir="ltr"
-              rel="noreferrer"
-            >
-              /vendors/{profile.slug}
-            </a>
-            {regionLabel ? <p className="mt-2">{regionLabel}</p> : null}
-            {profile.categories?.map((c) => (
-              <Badge key={c.id} className="mt-2 me-2">
-                {vendorCategoryLabel(c, isAr, categoryRefMap)}
-              </Badge>
-            ))}
-          </div>
-
-          <Button type="submit" variant="dark" loading={isLoading}>
-            {t('profile.saveChanges')}
-          </Button>
-        </form>
+          <ProfilePublicLinkSection profile={profile} regionLabel={regionLabel} />
+          <ProfileCategoriesSection categories={profile.categories} />
+        </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

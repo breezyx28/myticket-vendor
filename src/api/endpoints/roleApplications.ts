@@ -2,6 +2,7 @@ import { baseApi } from '@/api/baseApi';
 import type { AcknowledgementResponse } from '@/api/types/auth';
 import type { Id } from '@/api/types/common';
 import { unwrapData } from '@/api/types/common';
+import type { SyncCategoriesRequest } from '@/api/types/category';
 import type {
   AddVendorCategoryRequest,
   CreateVendorApplicationRequest,
@@ -141,6 +142,26 @@ export const roleApplicationsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['RoleApplication'],
     }),
+    syncVendorApplicationCategories: build.mutation<
+      { categories: VendorApplicationCategory[] },
+      { id: Id; body: SyncCategoriesRequest }
+    >({
+      query: ({ id, body }) => ({
+        url: `/${VENDOR}/${id}/categories`,
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (
+        raw:
+          | { categories: VendorApplicationCategory[] }
+          | { data: { categories: VendorApplicationCategory[] } },
+      ) => {
+        const data = unwrapData(raw as { data: { categories: VendorApplicationCategory[] } });
+        if (data?.categories) return data;
+        return raw as { categories: VendorApplicationCategory[] };
+      },
+      invalidatesTags: ['RoleApplication'],
+    }),
   }),
 });
 
@@ -159,4 +180,5 @@ export const {
   useDeleteVendorGalleryItemMutation,
   useAddVendorCategoryMutation,
   useDeleteVendorCategoryMutation,
+  useSyncVendorApplicationCategoriesMutation,
 } = roleApplicationsApi;

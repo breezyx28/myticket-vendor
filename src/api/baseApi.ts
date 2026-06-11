@@ -19,6 +19,7 @@ export const API_BASE_URL = joinUrl(ENV.apiBase, ENV.apiPrefix);
 export const apiTagTypes = [
   'Me',
   'Session',
+  'Device',
   'RoleApplication',
   'VendorProfile',
   'VendorAvailability',
@@ -27,6 +28,9 @@ export const apiTagTypes = [
   'SaudiRegion',
   'VendorServiceCategory',
   'Preferences',
+  'Notification',
+  'NotificationPrefs',
+  'GovernmentIdVerification',
 ] as const;
 
 export type ApiTagType = (typeof apiTagTypes)[number];

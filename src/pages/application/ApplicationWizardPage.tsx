@@ -4,29 +4,26 @@ import { Select } from '@/components/forms/Select';
 import { TextArea } from '@/components/forms/TextArea';
 import { TextInput } from '@/components/forms/TextInput';
 import { ApplicationStatusBanner } from '@/components/vendor/ApplicationStatusBanner';
+import { VendorCategoryPicker } from '@/components/vendor/VendorCategoryPicker';
 import {
-  useAddVendorCategoryMutation,
   useAddVendorDocumentMutation,
   useAddVendorGalleryItemMutation,
   useCreateVendorApplicationMutation,
-  useDeleteVendorCategoryMutation,
   useDeleteVendorDocumentMutation,
   useDeleteVendorGalleryItemMutation,
   useGetMyRoleApplicationsQuery,
   useGetRoleApplicationQuery,
   useGetSaudiRegionsQuery,
-  useGetVendorServiceCategoriesQuery,
   useSubmitVendorApplicationMutation,
   useUpdateVendorApplicationMutation,
 } from '@/api/endpoints';
-import type { VendorServiceCategory } from '@/api/types/reference';
+import { useVendorCategories } from '@/hooks/useVendorCategories';
 import {
   isVendorApplicationReady,
   VENDOR_BIO_MAX_CHARS,
 } from '@/lib/onboardingValidation';
 import { readApiErrorMessage, readApiFieldErrors } from '@/lib/apiErrors';
 import { uploadToCdn } from '@/lib/upload';
-import { vendorCategoryLabel } from '@/lib/vendorCategoryLabel';
 import {
   createVendorApplicationSchema,
   vendorApplicationPatchSchema,
@@ -45,7 +42,7 @@ import { toast } from 'sonner';
 const STEPS = ['identity', 'services', 'verification', 'review'] as const;
 
 export function ApplicationWizardPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const stepIndex = Math.min(
@@ -64,9 +61,6 @@ export function ApplicationWizardPage() {
 
   const { data: regionsData } = useGetSaudiRegionsQuery();
   const regions = regionsData?.data ?? [];
-  const { data: serviceCategories = [], isLoading: loadingCategories } =
-    useGetVendorServiceCategoriesQuery();
-
   const [createApplication] = useCreateVendorApplicationMutation();
   const [updateApplication] = useUpdateVendorApplicationMutation();
   const [submitApplication, { isLoading: submitting }] = useSubmitVendorApplicationMutation();
@@ -74,17 +68,27 @@ export function ApplicationWizardPage() {
   const [deleteDocument] = useDeleteVendorDocumentMutation();
   const [addGalleryItem] = useAddVendorGalleryItemMutation();
   const [deleteGalleryItem] = useDeleteVendorGalleryItemMutation();
-  const [addCategory] = useAddVendorCategoryMutation();
-  const [deleteCategory] = useDeleteVendorCategoryMutation();
-
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [uploading, setUploading] = useState(false);
-  const [categorySaving, setCategorySaving] = useState(false);
   const [localAppId, setLocalAppId] = useState<string | number | null>(null);
   const [docLabel, setDocLabel] = useState('');
   const [docUrl, setDocUrl] = useState('');
 
   const effectiveId = applicationId ?? localAppId;
+
+  const {
+    isAr,
+    presets: serviceCategories,
+    loadingPresets: loadingCategories,
+    selection: categorySelection,
+    setDraft: setCategorySelection,
+    saving: categorySaving,
+    persistCategories,
+  } = useVendorCategories({
+    mode: 'application',
+    applicationId: effectiveId,
+    attached: detail?.vendor_application?.categories,
+  });
 
   const identityForm = useForm<CreateVendorApplicationSchema>({
     resolver: yupResolver(createVendorApplicationSchema) as never,
@@ -112,6 +116,12 @@ export function ApplicationWizardPage() {
       bio: va.bio ?? '',
     });
   }, [detail, identityForm, servicesForm]);
+
+  useEffect(() => {
+    if (!effectiveId || categorySelection.length === 0) return;
+    const timer = window.setTimeout(() => void persistCategories(categorySelection), 600);
+    return () => window.clearTimeout(timer);
+  }, [categorySelection, effectiveId, persistCategories]);
 
   const selectedRegionId = useMemo(() => {
     const cityId = servicesForm.watch('city');
@@ -192,11 +202,11 @@ export function ApplicationWizardPage() {
   async function onServicesNext() {
     const valid = await servicesForm.trigger();
     if (!valid || !effectiveId) return;
-    const categoryCount = detail?.vendor_application?.categories?.length ?? 0;
-    if (categoryCount === 0) {
+    if (categorySelection.length === 0) {
       toast.error(t('application.categoriesRequired'));
       return;
     }
+    await persistCategories(categorySelection);
     const values = servicesForm.getValues();
     await persistPatch({
       business_name: values.business_name || identityForm.getValues('profile_name'),
@@ -205,28 +215,6 @@ export function ApplicationWizardPage() {
       coverage_area: values.coverage_area,
     });
     goToStep(2);
-  }
-
-  async function toggleCategory(category: VendorServiceCategory) {
-    if (!effectiveId) return;
-    const applicationCategories = detail?.vendor_application?.categories ?? [];
-    const existing = applicationCategories.find(
-      (item) => item.slug === category.slug || item.service_category_id === category.id,
-    );
-
-    setCategorySaving(true);
-    try {
-      if (existing) {
-        await deleteCategory({ id: effectiveId, rowId: existing.id }).unwrap();
-      } else {
-        await addCategory({ id: effectiveId, body: { slug: category.slug } }).unwrap();
-      }
-      void refetchDetail();
-    } catch (err) {
-      toast.error(readApiErrorMessage(err, t('common.error')));
-    } finally {
-      setCategorySaving(false);
-    }
   }
 
   async function onDocumentUpload(file: File, kind: 'document' | 'url' = 'document') {
@@ -338,9 +326,7 @@ export function ApplicationWizardPage() {
 
   const documents = detail?.vendor_application?.documents ?? [];
   const gallery = detail?.vendor_application?.gallery ?? [];
-  const applicationCategories = detail?.vendor_application?.categories ?? [];
   const readyForSubmit = detail ? isVendorApplicationReady(detail as VendorApplicationDetail) : false;
-  const isAr = i18n.language === 'ar';
 
   return (
     <div className="space-y-6">
@@ -412,30 +398,24 @@ export function ApplicationWizardPage() {
               </Select>
             </Field>
             <div>
-              <p className="mb-2 text-[14px] font-semibold text-ink">{t('application.serviceCategories')}</p>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="text-[14px] font-semibold text-ink">{t('application.serviceCategories')}</p>
+                {categorySaving ? (
+                  <span className="text-[11px] font-medium text-ink-40">{t('common.saving')}</span>
+                ) : null}
+              </div>
               {loadingCategories ? (
                 <p className="text-[12px] text-ink-40">{t('common.loading')}</p>
               ) : (
-                <div className="flex flex-wrap gap-2">
-                  {serviceCategories.map((cat) => {
-                    const selected = applicationCategories.some(
-                      (item) => item.slug === cat.slug || item.service_category_id === cat.id,
-                    );
-                    return (
-                      <button
-                        key={cat.slug}
-                        type="button"
-                        disabled={categorySaving || !effectiveId}
-                        onClick={() => void toggleCategory(cat)}
-                        className={`rounded-full px-3 py-1.5 text-[12px] font-semibold ${selected ? 'bg-ink text-white' : 'border border-ink-10 bg-white text-ink-60'}`}
-                      >
-                        {vendorCategoryLabel(cat, isAr)}
-                      </button>
-                    );
-                  })}
-                </div>
+                <VendorCategoryPicker
+                  presets={serviceCategories}
+                  value={categorySelection}
+                  onChange={setCategorySelection}
+                  disabled={categorySaving || !effectiveId}
+                  isAr={isAr}
+                />
               )}
-              <p className="mt-2 text-[11px] text-ink-40">{t('application.categoriesNote')}</p>
+              <p className="mt-3 text-[11px] text-ink-40">{t('application.categoriesNote')}</p>
             </div>
             <div className="flex gap-3">
               <Button type="button" variant="outline" onClick={() => goToStep(0)}>
@@ -561,7 +541,7 @@ export function ApplicationWizardPage() {
               </p>
               <p className="mt-2 line-clamp-3">{identityForm.getValues('bio')}</p>
               <p className="mt-2 text-[12px]">
-                {applicationCategories.length} {t('application.serviceCategories')} · {documents.length}{' '}
+                {categorySelection.length} {t('application.serviceCategories')} · {documents.length}{' '}
                 {t('application.documents')} · {gallery.length} {t('application.gallery')}
               </p>
             </div>

@@ -8,3 +8,6 @@ export * from './roleApplications';
 export * from './engagements';
 export * from './vendors';
 export * from './reference';
+export * from './vendorCategories';
+export * from './notifications';
+export * from './governmentId';

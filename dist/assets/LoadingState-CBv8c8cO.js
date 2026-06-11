@@ -1,0 +1,1 @@
+import{i as e,r as t}from"./utils-Cm9wGbCz.js";var n=t();function r({className:t}){let{t:r}=e();return(0,n.jsx)(`p`,{className:t??`text-[14px] text-ink-60`,children:r(`common.loading`)})}export{r as t};

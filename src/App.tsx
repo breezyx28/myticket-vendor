@@ -60,6 +60,15 @@ const RatingsPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import('@/pages/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
+const PortfolioPage = lazy(() =>
+  import('@/pages/profile/PortfolioPage').then((m) => ({ default: m.PortfolioPage })),
+);
+const NotificationsPage = lazy(() =>
+  import('@/pages/notifications/NotificationsPage').then((m) => ({ default: m.NotificationsPage })),
+);
+const GovernmentIdPage = lazy(() =>
+  import('@/pages/profile/GovernmentIdPage').then((m) => ({ default: m.GovernmentIdPage })),
+);
 
 function RouteFallback() {
   return <PageSkeleton />;
@@ -94,6 +103,9 @@ export function App() {
               <Route element={<VendorShellLayout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/portfolio" element={<PortfolioPage />} />
+                <Route path="/government-id" element={<GovernmentIdPage />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/availability" element={<AvailabilityPage />} />
                 <Route path="/engagements" element={<EngagementsPage />} />
                 <Route path="/engagements/:id" element={<EngagementDetailPage />} />

@@ -18,43 +18,11 @@ export type EngagementStatus =
   | 'cancelled'
   | 'closed';
 
-export interface VendorProfileCategory {
-  id: number;
-  vendor_profile_id: number;
-  service_category_id: number;
-  slug?: string;
-  name_en?: string;
-  name_ar?: string;
-}
-
-export interface VendorProfileGalleryItem {
-  id: number;
-  vendor_profile_id: number;
-  image_url: string;
-  caption: string | null;
-  position: number;
-}
-
-export interface VendorProfile {
-  id: number;
-  user_id: number;
-  slug: string;
-  business_name: string;
-  bio: string | null;
-  region_id: number | null;
-  city_id: number | null;
-  coverage_area: string | null;
-  profile_image_url: string | null;
-  website_url: string | null;
-  instagram_handle: string | null;
-  availability_status: VendorAvailability;
-  rating_average: string;
-  rating_count: number;
-  completed_bookings: number;
-  is_active: boolean;
-  categories?: VendorProfileCategory[];
-  gallery?: VendorProfileGalleryItem[];
-}
+export type {
+  Vendor as VendorProfile,
+  VendorProfileCategory,
+  VendorProfileGalleryItem,
+} from '@/api/types/vendor';
 
 export interface VendorApplicationDocument {
   id: number;

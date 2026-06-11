@@ -43,6 +43,10 @@
   --shadow-card-md: 0 8px 24px rgba(0, 0, 0, 0.08);
   --shadow-card-lg: 0 12px 40px rgba(0, 0, 0, 0.1);
   --shadow-card-xl: 0 20px 48px rgba(0, 0, 0, 0.12);
+  --shadow-ink-sm: 0 4px 14px rgba(13, 13, 13, 0.06);
+
+  --spacing-page: 2rem;
+  --spacing-section: 1.5rem;
 }
 
 @utility line-clamp-2 {
@@ -68,6 +72,10 @@
   box-shadow: var(--shadow-card-xl);
 }
 
+@utility shadow-ink-sm {
+  box-shadow: var(--shadow-ink-sm);
+}
+
 @layer base {
   *,
   *::before,
@@ -76,6 +84,7 @@
   }
   html {
     font-family: var(--font-sans);
+    scroll-behavior: smooth;
   }
   body {
     margin: 0;

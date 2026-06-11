@@ -75,6 +75,10 @@ export interface VendorApplicationCategory {
   slug?: string;
   name_en?: string;
   name_ar?: string;
+  is_custom?: boolean;
+  is_active?: boolean;
+  display_order?: number;
+  created_by_user_id?: number | null;
   [key: string]: unknown;
 }
 

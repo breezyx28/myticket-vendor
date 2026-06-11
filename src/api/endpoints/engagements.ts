@@ -1,5 +1,10 @@
 import { baseApi } from '@/api/baseApi';
 import type { Id, Paginated, PaginationQuery } from '@/api/types/common';
+import type { EngagementStatus } from '@/types/domain';
+
+export interface ListEngagementsQuery extends PaginationQuery {
+  status?: EngagementStatus;
+}
 import { unwrapData } from '@/api/types/common';
 import type {
   DeclineEngagementRequest,
@@ -14,7 +19,7 @@ function engagementMessagesTag(id: Id) {
 
 export const engagementsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    listEngagements: build.query<Paginated<Engagement>, PaginationQuery | void>({
+    listEngagements: build.query<Paginated<Engagement>, ListEngagementsQuery | void>({
       query: (params) => ({ url: '/me/engagements', params: params ?? undefined }),
       providesTags: (result) =>
         result?.data

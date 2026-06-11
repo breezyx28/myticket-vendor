@@ -8,6 +8,10 @@ export interface VendorProfileCategory {
   slug?: string;
   name_en?: string;
   name_ar?: string;
+  is_custom?: boolean;
+  is_active?: boolean;
+  display_order?: number;
+  created_by_user_id?: number | null;
 }
 
 export interface VendorProfileGalleryItem {
@@ -16,6 +20,17 @@ export interface VendorProfileGalleryItem {
   image_url: string;
   caption: string | null;
   position: number;
+  created_at?: Iso8601;
+}
+
+export interface VendorProfileGallerySyncItem {
+  image_url: string;
+  caption?: string | null;
+  position?: number;
+}
+
+export interface SyncVendorProfileGalleryRequest {
+  gallery: VendorProfileGallerySyncItem[];
 }
 
 export interface Vendor {
@@ -52,10 +67,19 @@ export interface VendorRating {
   updated_at: Iso8601;
 }
 
+export interface VendorProfileGalleryUpload {
+  image_url: string;
+  caption?: string;
+  position?: number;
+}
+
 export interface UpdateVendorProfileRequest {
   business_name?: string;
   bio?: string | null;
   website_url?: string | null;
   instagram_handle?: string | null;
   coverage_area?: string | null;
+  /** Preferred write alias — maps to `profile_image_url` in DB (assumed; see vendor-frontend-backend-gaps.md). */
+  profile_image?: string | null;
 }
+

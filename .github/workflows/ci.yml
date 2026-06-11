@@ -35,4 +35,9 @@ jobs:
         run: bun run test
 
       - name: Build
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://myticket-api.kat-jr.com' }}
+          VITE_API_PREFIX: ${{ vars.VITE_API_PREFIX || '/api/v1/main' }}
+          VITE_MAIN_WEBSITE_URL: ${{ vars.VITE_MAIN_WEBSITE_URL || 'https://myticket.kat-jr.com' }}
+          VITE_VENDOR_DASHBOARD_URL: ${{ vars.VITE_VENDOR_DASHBOARD_URL || 'https://myticket-vendor.kat-jr.com' }}
         run: bun run build

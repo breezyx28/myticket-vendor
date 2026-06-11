@@ -1,3 +1,4 @@
+import { PageHeader, PageShell, SectionCard } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { SectionSkeleton } from '@/components/ui/SectionSkeleton';
@@ -42,13 +43,12 @@ export function HomePage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-[32px] font-extrabold tracking-tight text-ink">
-          {profile?.business_name ?? t('nav.home')}
-        </h1>
-        <p className="mt-2 text-[14px] text-ink-60">{t('dashboard.welcome')}</p>
-      </div>
+    <PageShell>
+      <PageHeader
+        size="hero"
+        title={profile?.business_name ?? t('nav.home')}
+        subtitle={t('dashboard.welcome')}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatBubble
@@ -71,7 +71,10 @@ export function HomePage() {
           value={pendingCount}
           icon={MessageSquare}
           footer={
-            <Link to="/engagements" className="text-[12px] font-semibold text-coral hover:underline">
+            <Link
+              to="/engagements"
+              className="text-[12px] font-semibold text-coral transition-colors hover:underline"
+            >
               {t('nav.engagements')}
             </Link>
           }
@@ -85,7 +88,10 @@ export function HomePage() {
             />
           }
           footer={
-            <Link to="/availability" className="text-[12px] font-semibold text-coral hover:underline">
+            <Link
+              to="/availability"
+              className="text-[12px] font-semibold text-coral transition-colors hover:underline"
+            >
               {t('nav.availability')}
             </Link>
           }
@@ -110,11 +116,9 @@ export function HomePage() {
         </a>
       </div>
 
-      <section className="rounded-3xl border border-ink-10 bg-white p-6 shadow-card-sm">
-        <h2 className="text-lg font-extrabold text-ink">{t('dashboard.recentEngagements')}</h2>
+      <SectionCard title={t('dashboard.recentEngagements')}>
         {recent.length === 0 ? (
           <EmptyState
-            className="mt-4"
             title={t('engagements.empty')}
             action={
               <Link to="/engagements">
@@ -125,25 +129,30 @@ export function HomePage() {
             }
           />
         ) : (
-          <ul className="mt-4 divide-y divide-ink-10">
+          <ul className="divide-y divide-ink-10">
             {recent.map((e) => (
-              <li key={e.id} className="flex items-center justify-between gap-4 py-3">
-                <div>
-                  <p className="font-semibold text-ink">{e.topic}</p>
-                  <p className="text-[12px] text-ink-40">
-                    {e.organizer_profile_snapshot?.display_name ?? 'Organizer'} ·{' '}
-                    <span dir="ltr">{new Date(e.last_message_at).toLocaleString()}</span>
-                  </p>
-                </div>
-                <StatusPill
-                  status={e.status}
-                  label={t(`engagements.status_${e.status}` as 'engagements.status_pending')}
-                />
+              <li key={e.id}>
+                <Link
+                  to={`/engagements?focus=${e.id}`}
+                  className="flex items-center justify-between gap-4 py-3 transition-colors duration-200 hover:bg-ink-5/50"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-ink">{e.topic}</p>
+                    <p className="text-[12px] text-ink-40">
+                      {e.organizer_profile_snapshot?.display_name ?? 'Organizer'} ·{' '}
+                      <span dir="ltr">{new Date(e.last_message_at).toLocaleString()}</span>
+                    </p>
+                  </div>
+                  <StatusPill
+                    status={e.status}
+                    label={t(`engagements.status_${e.status}` as 'engagements.status_pending')}
+                  />
+                </Link>
               </li>
             ))}
           </ul>
         )}
-      </section>
-    </div>
+      </SectionCard>
+    </PageShell>
   );
 }

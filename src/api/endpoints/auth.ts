@@ -2,6 +2,10 @@ import { baseApi } from '@/api/baseApi';
 import type {
   AcknowledgementResponse,
   AuthSuccessResponse,
+  ChangeEmailRequest,
+  ChangeEmailResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
   ForgotPasswordRequest,
   LoginRequest,
   LoginResponse,
@@ -44,6 +48,13 @@ export const authApi = baseApi.injectEndpoints({
       query: () => ({ url: '/auth/logout', method: 'POST' }),
       invalidatesTags: ['Me', 'Session'],
     }),
+    changePassword: build.mutation<ChangePasswordResponse, ChangePasswordRequest>({
+      query: (body) => ({ url: '/auth/password/change', method: 'POST', body }),
+      invalidatesTags: ['Session'],
+    }),
+    changeEmail: build.mutation<ChangeEmailResponse, ChangeEmailRequest>({
+      query: (body) => ({ url: '/auth/email/change', method: 'POST', body }),
+    }),
   }),
 });
 
@@ -54,4 +65,6 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useLogoutMutation,
+  useChangePasswordMutation,
+  useChangeEmailMutation,
 } = authApi;

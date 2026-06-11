@@ -1,6 +1,58 @@
 import type { Id, Iso8601 } from '@/api/types/common';
 import type { VendorAvailability } from '@/types/domain';
 
+export interface UpdateMeRequest {
+  full_name?: string;
+  display_name?: string;
+  bio?: string;
+  avatar_url?: string;
+  phone?: string;
+  [key: string]: unknown;
+}
+
+export interface UserSession {
+  id: Id;
+  ip_address?: string;
+  user_agent?: string;
+  device_label?: string | null;
+  last_active_at?: Iso8601;
+  current?: boolean;
+  [key: string]: unknown;
+}
+
+export type DevicePlatform = 'ios' | 'android' | 'web' | string;
+
+export interface RegisterDeviceRequest {
+  app: string;
+  platform: DevicePlatform;
+  token: string;
+  device_label?: string;
+}
+
+export interface UserDevice {
+  id: Id;
+  app: string;
+  platform: DevicePlatform;
+  device_label?: string | null;
+  last_seen_at?: Iso8601 | null;
+  is_current?: boolean;
+  created_at?: Iso8601;
+  [key: string]: unknown;
+}
+
+export interface NotificationPreferences {
+  email: boolean;
+  push: boolean;
+  sms: boolean;
+  [key: string]: unknown;
+}
+
+export interface UpdateNotificationPreferencesRequest {
+  email?: boolean;
+  push?: boolean;
+  sms?: boolean;
+}
+
 export interface UserMe {
   id: Id;
   email: string;

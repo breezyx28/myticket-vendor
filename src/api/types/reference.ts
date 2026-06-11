@@ -28,6 +28,8 @@ export interface VendorServiceCategory {
   name_ar: string;
   is_active: boolean;
   display_order: number;
+  is_custom?: boolean;
+  created_by_user_id?: number | null;
 }
 
 export interface VendorServiceCategoriesResponse {

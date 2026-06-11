@@ -1,22 +1,9 @@
+import { PageHeader, PageShell, SectionCard } from '@/components/layout';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { LoadingState } from '@/components/ui/LoadingState';
+import { StarsRow } from '@/components/vendor/StarsRow';
 import { useGetVendorProfileQuery, useListVendorRatingsQuery } from '@/api/endpoints';
-import { Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-function StarsRow({ value }: { value: number }) {
-  return (
-    <div className="flex gap-0.5" dir="ltr" aria-label={`${value} stars`}>
-      {Array.from({ length: 5 }, (_, i) => (
-        <Star
-          key={i}
-          size={18}
-          className={i < value ? 'fill-lemon text-lemon' : 'text-ink-20'}
-          strokeWidth={1.5}
-        />
-      ))}
-    </div>
-  );
-}
 
 export function RatingsPage() {
   const { t } = useTranslation();
@@ -29,46 +16,49 @@ export function RatingsPage() {
   const ratings = ratingsPaged?.data ?? [];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-[28px] font-extrabold text-ink">{t('ratings.title')}</h1>
-        {profile ? (
-          <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-ink-10 bg-white px-5 py-4 shadow-card-sm">
+    <PageShell>
+      <PageHeader title={t('ratings.title')} />
+
+      {profile ? (
+        <SectionCard variant="inset">
+          <div className="flex flex-wrap items-center gap-4">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-40">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-40">
                 {t('ratings.average')}
               </p>
-              <p className="font-mono text-3xl font-bold text-ink" dir="ltr">
+              <p className="font-mono text-3xl font-bold tabular-nums text-ink" dir="ltr">
                 {profile.rating_average}
               </p>
             </div>
             <StarsRow value={Math.round(Number(profile.rating_average) || 0)} />
             <p className="text-[13px] text-ink-60">{t('ratings.count', { count: profile.rating_count })}</p>
           </div>
-        ) : null}
-      </div>
+        </SectionCard>
+      ) : null}
 
       {isLoading ? (
-        <p className="text-[14px] text-ink-60">{t('common.loading')}</p>
+        <LoadingState />
       ) : ratings.length === 0 ? (
         <EmptyState title={t('ratings.empty')} />
       ) : (
         <ul className="space-y-3">
           {ratings.map((rating) => (
-            <li
-              key={rating.id}
-              className="flex items-center justify-between gap-4 rounded-2xl border border-ink-10 bg-white px-5 py-4 shadow-card-sm"
-            >
-              <StarsRow value={Math.min(5, Math.max(0, Math.round(rating.stars)))} />
-              {rating.created_at ? (
-                <span className="text-[12px] text-ink-40" dir="ltr">
-                  {new Date(rating.created_at).toLocaleDateString()}
-                </span>
+            <SectionCard key={rating.id} className="p-5">
+              <div className="flex items-center justify-between gap-4">
+                <StarsRow value={rating.stars} />
+                {rating.created_at ? (
+                  <span className="text-[12px] text-ink-40" dir="ltr">
+                    {new Date(rating.created_at).toLocaleDateString()}
+                  </span>
+                ) : null}
+              </div>
+              {rating.comment ? (
+                <p className="mt-3 text-[14px] leading-relaxed text-ink-60">{rating.comment}</p>
               ) : null}
-            </li>
+            </SectionCard>
           ))}
         </ul>
       )}
-    </div>
+    </PageShell>
   );
 }

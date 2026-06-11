@@ -1,7 +1,8 @@
+import { PageHeader, PageShell, SectionCard } from '@/components/layout';
 import { SectionSkeleton } from '@/components/ui/SectionSkeleton';
-import { AvailabilityToggle } from '@/components/vendor/AvailabilityToggle';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { AvailabilityToggle } from '@/components/vendor/AvailabilityToggle';
 import { useGetVendorProfileQuery, useGetVendorServiceCategoriesQuery } from '@/api/endpoints';
 import { buildVendorCategoryRefMap, vendorCategoryLabel } from '@/lib/vendorCategoryLabel';
 import { ENV } from '@/config/env';
@@ -26,30 +27,34 @@ export function PublicProfilePreviewPage() {
   const publicUrl = `${ENV.mainWebsiteUrl}/vendors/${profile.slug}`;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-[28px] font-extrabold text-ink">{t('nav.preview')}</h1>
-          <p className="mt-2 text-[14px] text-ink-60">{t('profile.publicSlug')}</p>
-        </div>
-        <a href={publicUrl} target="_blank" rel="noreferrer">
-          <Button variant="outline">
-            <ExternalLink size={16} />
-            {t('nav.preview')}
-          </Button>
-        </a>
-      </div>
+    <PageShell spacing={6}>
+      <PageHeader
+        title={t('nav.preview')}
+        subtitle={t('profile.publicSlug')}
+        actions={
+          <a href={publicUrl} target="_blank" rel="noreferrer">
+            <Button variant="outline">
+              <ExternalLink size={16} />
+              {t('nav.preview')}
+            </Button>
+          </a>
+        }
+      />
 
-      <article className="overflow-hidden rounded-3xl border border-ink-10 bg-white shadow-card-md">
+      <SectionCard className="overflow-hidden p-0 shadow-card-md">
         <div className="grid gap-0 md:grid-cols-[240px_1fr]">
           {profile.profile_image_url ? (
-            <img src={profile.profile_image_url} alt="" className="h-full min-h-[240px] w-full object-cover" />
+            <img
+              src={profile.profile_image_url}
+              alt=""
+              className="h-full min-h-[240px] w-full object-cover"
+            />
           ) : (
             <div className="min-h-[240px] bg-gradient-to-br from-lemon/40 to-coral/20" />
           )}
           <div className="p-6 md:p-8">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-2xl font-extrabold text-ink">{profile.business_name}</h2>
+              <h2 className="text-2xl font-extrabold tracking-tight text-ink">{profile.business_name}</h2>
               <AvailabilityToggle status={profile.availability_status} readOnly />
             </div>
             <div className="mt-3 flex items-center gap-2 text-[14px] font-semibold text-ink" dir="ltr">
@@ -83,7 +88,7 @@ export function PublicProfilePreviewPage() {
             ))}
           </div>
         ) : null}
-      </article>
-    </div>
+      </SectionCard>
+    </PageShell>
   );
 }
