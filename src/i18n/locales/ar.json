@@ -186,6 +186,7 @@
   "settings": {
     "title": "الإعدادات",
     "subtitle": "إدارة اللغة والإشعارات وتفضيلات الحساب.",
+    "jumpToSection": "انتقل إلى قسم",
     "language": "اللغة",
     "languageHint": "اختر لغة لوحة التحكم المفضلة.",
     "notifications": "الإشعارات",

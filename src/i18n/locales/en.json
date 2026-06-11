@@ -186,6 +186,7 @@
   "settings": {
     "title": "Settings",
     "subtitle": "Manage language, notifications, and account preferences.",
+    "jumpToSection": "Jump to section",
     "language": "Language",
     "languageHint": "Choose your preferred dashboard language.",
     "notifications": "Notifications",
