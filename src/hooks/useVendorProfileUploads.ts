@@ -2,7 +2,7 @@ import {
   useAddVendorProfileGalleryItemMutation,
   useDeleteVendorProfileGalleryItemMutation,
   useSyncVendorProfileGalleryMutation,
-  useUpdateVendorProfileMutation,
+  useUploadProfileImageMutation,
   useUploadVendorProfileGalleryFileMutation,
 } from '@/api/endpoints';
 import { readApiErrorMessage } from '@/lib/apiErrors';
@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 export function useVendorProfileUploads(input: { galleryCount?: number }) {
   const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
-  const [updateProfile] = useUpdateVendorProfileMutation();
+  const [uploadProfileImageMutation] = useUploadProfileImageMutation();
   const [uploadGalleryFile] = useUploadVendorProfileGalleryFileMutation();
   const [addGalleryItem] = useAddVendorProfileGalleryItemMutation();
   const [deleteGalleryItem] = useDeleteVendorProfileGalleryItemMutation();
@@ -25,8 +25,7 @@ export function useVendorProfileUploads(input: { galleryCount?: number }) {
     async (file: File) => {
       setUploading(true);
       try {
-        const { url } = await uploadToCdn(file, 'vendor_profile');
-        await updateProfile({ profile_image: url }).unwrap();
+        await uploadProfileImageMutation({ file }).unwrap();
         toast.success(t('common.saved'));
       } catch (err) {
         toast.error(readApiErrorMessage(err, t('portfolio.imageUpdateFailed')));
@@ -34,7 +33,7 @@ export function useVendorProfileUploads(input: { galleryCount?: number }) {
         setUploading(false);
       }
     },
-    [t, updateProfile],
+    [t, uploadProfileImageMutation],
   );
 
   const uploadGalleryImage = useCallback(

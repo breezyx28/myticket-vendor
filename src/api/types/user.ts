@@ -107,3 +107,12 @@ export interface UpdateVendorAvailabilityRequest {
   status: VendorAvailability;
 }
 
+export interface ProfileImageUpload {
+  user_id: Id;
+  profile_image_url: string;
+  avatar_url: string;
+  content_type: string;
+  size_bytes: number;
+  synced_profiles: string[];
+}
+

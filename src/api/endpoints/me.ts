@@ -12,6 +12,7 @@ import type {
   VendorProfileGalleryUpload,
 } from '@/api/types/vendor';
 import type {
+  ProfileImageUpload,
   RegisterDeviceRequest,
   UpdateMeRequest,
   UpdateUserPreferencesRequest,
@@ -43,6 +44,16 @@ export const meApi = baseApi.injectEndpoints({
       query: (body) => ({ url: '/me', method: 'PATCH', body }),
       transformResponse: (response: unknown) => unwrapUserMeResponse(response),
       invalidatesTags: ['Me'],
+    }),
+    uploadProfileImage: build.mutation<ProfileImageUpload, { file: File }>({
+      query: ({ file }) => {
+        const form = new FormData();
+        form.append('image', file);
+        return { url: '/me/profile-image', method: 'POST', body: form };
+      },
+      transformResponse: (raw: ProfileImageUpload | { data: ProfileImageUpload }) =>
+        unwrapData(raw) ?? (raw as ProfileImageUpload),
+      invalidatesTags: ['Me', 'VendorProfile'],
     }),
     listSessions: build.query<UserSession[], void>({
       query: () => ({ url: '/me/sessions' }),
@@ -188,6 +199,7 @@ export const {
   useGetMeQuery,
   useLazyGetMeQuery,
   useUpdateMeMutation,
+  useUploadProfileImageMutation,
   useListSessionsQuery,
   useRevokeSessionMutation,
   useListDevicesQuery,
