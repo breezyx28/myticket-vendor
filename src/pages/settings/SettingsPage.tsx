@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 import { PageHeader, PageShell, SectionCard, SectionHeading } from '@/components/layout';
 import {
   SettingsSectionNav,
@@ -18,21 +19,15 @@ import {
   useUpdateMeMutation,
   useUpdatePreferencesMutation,
 } from '@/api/endpoints';
-import type { AppLanguage } from '@/i18n';
 import { useAuth } from '@/hooks/useAuth';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useLocalizedResolver } from '@/hooks/useLocalizedResolver';
 import { useMutationToast } from '@/hooks/useMutationToast';
-import {
-  changeEmailSchema,
-  changePasswordSchema,
-  updateAccountSchema,
-  type ChangeEmailSchema,
-  type ChangePasswordSchema,
-  type UpdateAccountSchema,
-} from '@/schemas/auth';
-import { updatePreferencesSchema, type UpdatePreferencesSchema } from '@/schemas/profile';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { Globe, LogOut, Mail } from 'lucide-react';
-import { useEffect } from 'react';
+import { formatDateTime } from '@/lib/format';
+import { createAuthSchemas, type ChangeEmailSchema, type ChangePasswordSchema, type UpdateAccountSchema } from '@/schemas/auth';
+import { createProfileSchemas, type UpdatePreferencesSchema } from '@/schemas/profile';
+import { LogOut, Mail } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -42,6 +37,7 @@ const sectionAnchor = settingsSectionAnchorClass();
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation();
+  useDocumentTitle('settings.title');
   const { signOut } = useAuth();
   const { runMutation } = useMutationToast();
   const { data: me } = useGetMeQuery();
@@ -53,11 +49,16 @@ export function SettingsPage() {
   const [changeEmail, { isLoading: savingEmail }] = useChangeEmailMutation();
   const [revokeSession] = useRevokeSessionMutation();
 
-  const displayLang = preferences?.language ?? (i18n.language === 'ar' ? 'ar' : 'en');
+  const authSchemas = useMemo(() => createAuthSchemas(t), [t]);
+  const { updatePreferencesSchema } = useMemo(() => createProfileSchemas(t), [t]);
+  const prefsResolver = useLocalizedResolver(updatePreferencesSchema);
+  const accountResolver = useLocalizedResolver(authSchemas.updateAccountSchema);
+  const passwordResolver = useLocalizedResolver(authSchemas.changePasswordSchema);
+  const emailResolver = useLocalizedResolver(authSchemas.changeEmailSchema);
   const showSessions = sessions.length > 0;
 
   const prefsForm = useForm<UpdatePreferencesSchema>({
-    resolver: yupResolver(updatePreferencesSchema) as never,
+    resolver: prefsResolver,
     defaultValues: {
       language: 'en',
       theme: 'system',
@@ -69,12 +70,12 @@ export function SettingsPage() {
   });
 
   const accountForm = useForm<UpdateAccountSchema>({
-    resolver: yupResolver(updateAccountSchema) as never,
+    resolver: accountResolver,
     defaultValues: { full_name: '', display_name: '', phone: '' },
   });
 
   const passwordForm = useForm<ChangePasswordSchema>({
-    resolver: yupResolver(changePasswordSchema) as never,
+    resolver: passwordResolver,
     defaultValues: {
       current_password: '',
       new_password: '',
@@ -83,7 +84,7 @@ export function SettingsPage() {
   });
 
   const emailForm = useForm<ChangeEmailSchema>({
-    resolver: yupResolver(changeEmailSchema) as never,
+    resolver: emailResolver,
     defaultValues: { new_email: '', current_password: '' },
   });
 
@@ -108,15 +109,6 @@ export function SettingsPage() {
     });
   }, [me, accountForm]);
 
-  async function setLanguage(next: AppLanguage) {
-    await i18n.changeLanguage(next);
-    try {
-      await updatePreferences({ language: next }).unwrap();
-    } catch {
-      /* language still switched locally */
-    }
-  }
-
   return (
     <PageShell spacing={6} className="w-full max-w-4xl">
       <PageHeader title={t('settings.title')} subtitle={t('settings.subtitle')} />
@@ -132,27 +124,8 @@ export function SettingsPage() {
           <SectionCard variant="plain" className="overflow-hidden rounded-2xl sm:rounded-3xl">
             <div id="language" className={cn(sectionPad, sectionAnchor, 'border-b border-ink-10')}>
               <SectionHeading title={t('settings.language')} description={t('settings.languageHint')} />
-              <div className="mt-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-                <Button
-                  type="button"
-                  variant={displayLang === 'en' ? 'dark' : 'outline'}
-                  size="md"
-                  className="w-full sm:w-auto"
-                  onClick={() => void setLanguage('en')}
-                >
-                  <Globe size={16} className="me-2 shrink-0" />
-                  English
-                </Button>
-                <Button
-                  type="button"
-                  variant={displayLang === 'ar' ? 'dark' : 'outline'}
-                  size="md"
-                  className="w-full sm:w-auto"
-                  onClick={() => void setLanguage('ar')}
-                >
-                  <Globe size={16} className="me-2 shrink-0" />
-                  العربية
-                </Button>
+              <div className="mt-4">
+                <LanguageSwitcher variant="segmented" />
               </div>
             </div>
 
@@ -329,7 +302,7 @@ export function SettingsPage() {
                         </p>
                         {session.last_active_at ? (
                           <p className="mt-0.5 text-[11px] text-ink-40" dir="ltr">
-                            {new Date(session.last_active_at).toLocaleString()}
+                            {formatDateTime(session.last_active_at, i18n.language)}
                           </p>
                         ) : null}
                       </div>

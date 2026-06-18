@@ -5,6 +5,7 @@
 
 @theme {
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-sans-ar: "Noto Sans Arabic", "Plus Jakarta Sans", system-ui, sans-serif;
   --font-mono: "Space Grotesk", system-ui, sans-serif;
 
   --color-coral: #ff6b4a;
@@ -85,6 +86,12 @@
   html {
     font-family: var(--font-sans);
     scroll-behavior: smooth;
+  }
+  html[lang='ar'] {
+    font-family: var(--font-sans-ar);
+  }
+  html[lang='ar'] body {
+    line-height: 1.65;
   }
   body {
     margin: 0;

@@ -1,6 +1,8 @@
 import { API_BASE_URL } from '@/api/baseApi';
 import { getToken } from '@/api/authToken';
+import i18n from '@/i18n';
 import { readApiErrorMessage } from '@/lib/apiErrors';
+import { apiLanguageHeader } from '@/lib/locale';
 import { unwrapData } from '@/api/types/common';
 
 export interface UploadResult {
@@ -32,7 +34,10 @@ export async function uploadToCdn(
   form.append('file', file);
   form.append('context', context);
 
-  const headers: HeadersInit = { Accept: 'application/json' };
+  const headers: HeadersInit = {
+    Accept: 'application/json',
+    'Accept-Language': apiLanguageHeader(i18n.language),
+  };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -43,7 +48,7 @@ export async function uploadToCdn(
   });
 
   if (!res.ok) {
-    let message = 'Upload failed.';
+    let message = i18n.t('upload.failed');
     try {
       const json = (await res.json()) as unknown;
       message = readApiErrorMessage({ data: json }, message);
@@ -57,7 +62,7 @@ export async function uploadToCdn(
   const data = unwrapData(json) ?? (json as UploadResponseBody);
 
   if (!data?.url) {
-    throw new Error('Upload response did not include a URL.');
+    throw new Error(i18n.t('upload.noUrl'));
   }
 
   return {

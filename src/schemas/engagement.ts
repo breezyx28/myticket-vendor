@@ -1,23 +1,33 @@
 import * as yup from 'yup';
+import type { TFunction } from 'i18next';
 
-export const engagementMessageSchema = yup
-  .object({
-    body: yup
-      .string()
-      .trim()
-      .min(1, 'Message cannot be empty.')
-      .max(4000, 'Message is too long.')
-      .required('Message is required.'),
-    attachment_url: yup.string().trim().url('Attachment must be a valid URL.').notRequired(),
-  })
-  .strict();
+export function createEngagementSchemas(t: TFunction) {
+  const engagementMessageSchema = yup
+    .object({
+      body: yup
+        .string()
+        .trim()
+        .min(1, t('validation.messageEmpty'))
+        .max(4000, t('validation.messageTooLong'))
+        .required(t('validation.messageRequired')),
+      attachment_url: yup
+        .string()
+        .trim()
+        .url(t('validation.attachmentUrlInvalid'))
+        .notRequired(),
+    })
+    .strict();
 
-export type EngagementMessageSchema = yup.InferType<typeof engagementMessageSchema>;
+  const declineEngagementSchema = yup
+    .object({
+      reason: yup.string().trim().max(500, t('validation.reasonTooLong')).notRequired(),
+    })
+    .strict();
 
-export const declineEngagementSchema = yup
-  .object({
-    reason: yup.string().trim().max(500, 'Reason is too long.').notRequired(),
-  })
-  .strict();
+  return { engagementMessageSchema, declineEngagementSchema };
+}
 
-export type DeclineEngagementSchema = yup.InferType<typeof declineEngagementSchema>;
+type EngagementSchemas = ReturnType<typeof createEngagementSchemas>;
+
+export type EngagementMessageSchema = yup.InferType<EngagementSchemas['engagementMessageSchema']>;
+export type DeclineEngagementSchema = yup.InferType<EngagementSchemas['declineEngagementSchema']>;

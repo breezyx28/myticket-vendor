@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { changeEmailSchema, changePasswordSchema } from '@/schemas/auth';
+import { createAuthSchemas } from '@/schemas/auth';
+import { testT } from '@/schemas/testI18n';
+
+const { changePasswordSchema, changeEmailSchema, otpVerificationSchema } = createAuthSchemas(testT);
 
 describe('changePasswordSchema', () => {
   it('requires matching confirmation', async () => {
@@ -27,5 +30,17 @@ describe('changeEmailSchema', () => {
     await expect(
       changeEmailSchema.validate({ new_email: 'vendor@example.com', current_password: '' }),
     ).rejects.toThrow();
+  });
+});
+
+describe('otpVerificationSchema', () => {
+  it('requires a non-empty code', async () => {
+    await expect(otpVerificationSchema.validate({ otp: '' })).rejects.toThrow();
+  });
+
+  it('accepts a trimmed code', async () => {
+    await expect(otpVerificationSchema.validate({ otp: '123456' })).resolves.toMatchObject({
+      otp: '123456',
+    });
   });
 });

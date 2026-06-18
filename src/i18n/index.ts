@@ -8,9 +8,11 @@ export const SUPPORTED_LANGUAGES = ['en', 'ar'] as const;
 export type AppLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 function applyDocumentDirection(lng: string) {
+  if (typeof document === 'undefined') return;
   const dir = lng === 'ar' ? 'rtl' : 'ltr';
   document.documentElement.dir = dir;
   document.documentElement.lang = lng;
+  document.title = i18n.t('meta.appTitle');
 }
 
 i18n

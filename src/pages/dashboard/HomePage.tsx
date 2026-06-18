@@ -11,13 +11,16 @@ import {
   useListEngagementsQuery,
 } from '@/api/endpoints';
 import { ENV } from '@/config/env';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { CalendarCheck, MessageSquare, Star, Ticket } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { formatDateTime, formatNumber } from '@/lib/format';
 
 export function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  useDocumentTitle('nav.home');
   const { data: profile, isLoading: profileLoading } = useGetVendorProfileQuery();
   const { data: availability } = useGetVendorAvailabilityQuery();
   const { data: engagements, isLoading: engagementsLoading } = useListEngagementsQuery({
@@ -53,7 +56,14 @@ export function HomePage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatBubble
           label={t('ratings.average')}
-          value={profile?.rating_average ?? '—'}
+          value={
+            profile?.rating_average != null
+              ? formatNumber(Number(profile.rating_average), i18n.language, {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })
+              : t('common.notAvailable')
+          }
           icon={Star}
           footer={
             <p className="text-[12px] text-ink-40">
@@ -139,8 +149,8 @@ export function HomePage() {
                   <div className="min-w-0">
                     <p className="truncate font-semibold text-ink">{e.topic}</p>
                     <p className="text-[12px] text-ink-40">
-                      {e.organizer_profile_snapshot?.display_name ?? 'Organizer'} ·{' '}
-                      <span dir="ltr">{new Date(e.last_message_at).toLocaleString()}</span>
+                      {e.organizer_profile_snapshot?.display_name ?? t('engagements.organizerFallback')} ·{' '}
+                      <span dir="ltr">{formatDateTime(e.last_message_at, i18n.language)}</span>
                     </p>
                   </div>
                   <StatusPill

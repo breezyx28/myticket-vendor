@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/Button';
 import { Field } from '@/components/forms/Field';
 import { TextInput } from '@/components/forms/TextInput';
 import { useAuth } from '@/hooks/useAuth';
-import { loginSchema, type LoginSchema } from '@/schemas/auth';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { createAuthSchemas, type LoginSchema, type OtpVerificationSchema } from '@/schemas/auth';
 import { ENV } from '@/config/env';
 import { readMainHandoff } from '@/lib/mainHandoff';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useLocalizedResolver } from '@/hooks/useLocalizedResolver';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +15,7 @@ import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react
 export function LoginPage() {
   const { user, signIn, signInWithOtp, signInWithOAuth } = useAuth();
   const { t } = useTranslation();
+  useDocumentTitle('auth.loginTitle');
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -23,6 +25,9 @@ export function LoginPage() {
   const [challengeToken, setChallengeToken] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const { loginSchema, otpVerificationSchema } = useMemo(() => createAuthSchemas(t), [t]);
+  const loginResolver = useLocalizedResolver(loginSchema);
+  const otpResolver = useLocalizedResolver(otpVerificationSchema);
 
   const {
     register,
@@ -31,7 +36,7 @@ export function LoginPage() {
     formState: { errors },
     getValues,
   } = useForm<LoginSchema>({
-    resolver: yupResolver(loginSchema),
+    resolver: loginResolver,
     defaultValues: { email: handoff.email ?? '', password: '' },
   });
 
@@ -40,7 +45,8 @@ export function LoginPage() {
     reset((prev) => ({ ...prev, email: handoff.email ?? prev.email }));
   }, [handoff.email, reset]);
 
-  const otpForm = useForm<{ otp: string }>({
+  const otpForm = useForm<OtpVerificationSchema>({
+    resolver: otpResolver,
     defaultValues: { otp: '' },
   });
 
@@ -73,12 +79,8 @@ export function LoginPage() {
     }
   }
 
-  async function onOtpSubmit() {
-    const otp = otpForm.getValues('otp').trim();
-    if (!otp) {
-      otpForm.setError('otp', { message: t('errors.validation') });
-      return;
-    }
+  async function onOtpSubmit(values: OtpVerificationSchema) {
+    const otp = values.otp.trim();
     setFormError(null);
     setSubmitting(true);
     try {
@@ -98,7 +100,7 @@ export function LoginPage() {
 
   return (
     <div className="mx-auto w-full max-w-md rounded-3xl border border-ink-10 bg-white p-8 shadow-card-lg">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-40">Vendor Dashboard</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-40">{t('brand.eyebrow')}</p>
       <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-ink">{t('auth.loginTitle')}</h1>
       {handoff.fromMainWebsite ? (
         <p className="mt-3 rounded-xl border border-sky/30 bg-sky/10 px-4 py-3 text-[13px] text-ink-60">
@@ -109,20 +111,19 @@ export function LoginPage() {
       {challengeToken ? (
         <form
           className="mt-8 space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void onOtpSubmit();
-          }}
+          onSubmit={otpForm.handleSubmit((values) => void onOtpSubmit(values))}
         >
           <p className="rounded-xl bg-indigo/10 px-4 py-3 text-[13px] font-medium text-ink">
-            Two-factor authentication is required.
+            {t('auth.twoFactorRequired')}
           </p>
-          <Field label="Verification code" error={otpForm.formState.errors.otp?.message}>
+          <Field label={t('auth.verificationCode')} error={otpForm.formState.errors.otp?.message}>
             <TextInput
               {...otpForm.register('otp')}
               autoComplete="one-time-code"
               inputMode="numeric"
               autoFocus
+              dir="ltr"
+              hasError={Boolean(otpForm.formState.errors.otp)}
             />
           </Field>
           {formError ? <p className="text-[12px] font-medium text-coral">{formError}</p> : null}

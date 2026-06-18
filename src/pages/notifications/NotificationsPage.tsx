@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 export function NotificationsPage() {
   const { t } = useTranslation();
+  useDocumentTitle('notifications.title');
   const { items, unreadCount, markRead, markAllRead, isLoading } = useNotifications();
 
   return (

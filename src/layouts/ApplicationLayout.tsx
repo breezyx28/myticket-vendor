@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 import { Outlet, useLocation } from 'react-router-dom';
@@ -20,12 +21,17 @@ export function ApplicationLayout() {
     <div className="min-h-dvh bg-surface-warm">
       <header className="border-b border-ink-10 bg-white/90 backdrop-blur-md">
         <div className="mx-auto max-w-[960px] px-6 py-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-40">
-            MyTicket Vendor
-          </p>
-          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink">
-            {t('application.step_identity')}
-          </h1>
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-40">
+                {t('brand.name')}
+              </p>
+              <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-ink">
+                {t(STEPS[activeStep])}
+              </h1>
+            </div>
+            <LanguageSwitcher variant="minimal" className="shrink-0" />
+          </div>
           <ol className="mt-6 flex flex-wrap gap-2">
             {STEPS.map((key, index) => {
               const done = index < activeStep;

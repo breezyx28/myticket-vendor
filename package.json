@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@emran-alhaddad/saudi-riyal-font": "^1.1.0",
+    "@fontsource/noto-sans-arabic": "^5.2.10",
     "@fontsource/plus-jakarta-sans": "^5.2.8",
     "@fontsource/space-grotesk": "^5.2.10",
     "@hookform/resolvers": "^5.2.2",

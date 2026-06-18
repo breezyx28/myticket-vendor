@@ -5,9 +5,20 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MyTicket — Vendor</title>
-    <script type="module" crossorigin src="/assets/index-vMHVpCbT.js"></script>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('i18nextLng') || 'en';
+          var ar = stored.indexOf('ar') === 0;
+          document.documentElement.lang = ar ? 'ar' : 'en';
+          document.documentElement.dir = ar ? 'rtl' : 'ltr';
+        } catch (e) {}
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-CDzihoH5.js"></script>
     <link rel="modulepreload" crossorigin href="/assets/utils-Cm9wGbCz.js">
-    <link rel="stylesheet" crossorigin href="/assets/index-DImlkX1y.css">
+    <link rel="modulepreload" crossorigin href="/assets/i18n-CQX3vfQT.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CeGQl1Pj.css">
   </head>
   <body>
     <div id="root"></div>

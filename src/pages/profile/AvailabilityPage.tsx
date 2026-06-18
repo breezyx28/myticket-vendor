@@ -5,11 +5,13 @@ import {
   useSetVendorAvailabilityMutation,
 } from '@/api/endpoints';
 import { useMutationToast } from '@/hooks/useMutationToast';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import type { VendorAvailability } from '@/types/domain';
 import { useTranslation } from 'react-i18next';
 
 export function AvailabilityPage() {
   const { t } = useTranslation();
+  useDocumentTitle('availability.title');
   const { data: availability, isLoading } = useGetVendorAvailabilityQuery();
   const [setAvailability, { isLoading: saving }] = useSetVendorAvailabilityMutation();
   const { runMutation } = useMutationToast();

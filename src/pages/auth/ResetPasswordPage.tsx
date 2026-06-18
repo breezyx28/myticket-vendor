@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/Button';
 import { Field } from '@/components/forms/Field';
 import { TextInput } from '@/components/forms/TextInput';
 import { useResetPasswordMutation } from '@/api/endpoints';
-import { resetPasswordSchema, type ResetPasswordSchema } from '@/schemas/auth';
+import { createAuthSchemas, type ResetPasswordSchema } from '@/schemas/auth';
 import { readApiErrorMessage } from '@/lib/apiErrors';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useEffect } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useLocalizedResolver } from '@/hooks/useLocalizedResolver';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -13,10 +14,13 @@ import { toast } from 'sonner';
 
 export function ResetPasswordPage() {
   const { t } = useTranslation();
+  useDocumentTitle('auth.resetPasswordTitle');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tokenFromQuery = searchParams.get('token') ?? '';
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
+  const { resetPasswordSchema } = useMemo(() => createAuthSchemas(t), [t]);
+  const resetPasswordResolver = useLocalizedResolver(resetPasswordSchema);
 
   const {
     register,
@@ -24,7 +28,7 @@ export function ResetPasswordPage() {
     setValue,
     formState: { errors },
   } = useForm<ResetPasswordSchema>({
-    resolver: yupResolver(resetPasswordSchema),
+    resolver: resetPasswordResolver,
     defaultValues: { token: tokenFromQuery, password: '', password_confirmation: '' },
   });
 
@@ -51,7 +55,7 @@ export function ResetPasswordPage() {
 
       <form className="mt-8 space-y-4" onSubmit={handleSubmit(onSubmit)}>
         {!tokenFromQuery ? (
-          <Field label="Reset token" error={errors.token?.message}>
+          <Field label={t('auth.resetToken')} error={errors.token?.message}>
             <TextInput
               {...register('token')}
               hasError={Boolean(errors.token)}
@@ -69,7 +73,7 @@ export function ResetPasswordPage() {
             dir="ltr"
           />
         </Field>
-        <Field label="Confirm password" error={errors.password_confirmation?.message}>
+        <Field label={t('auth.confirmPasswordLabel')} error={errors.password_confirmation?.message}>
           <TextInput
             {...register('password_confirmation')}
             type="password"

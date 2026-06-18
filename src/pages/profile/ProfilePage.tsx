@@ -12,18 +12,24 @@ import {
   useUpdateVendorProfileMutation,
 } from '@/api/endpoints';
 import { useMutationToast } from '@/hooks/useMutationToast';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useLocalizedResolver } from '@/hooks/useLocalizedResolver';
 import { useVendorProfileUploads } from '@/hooks/useVendorProfileUploads';
 import { ProfileCategoriesSection } from '@/pages/profile/sections/ProfileCategoriesSection';
 import { ProfilePublicLinkSection } from '@/pages/profile/sections/ProfilePublicLinkSection';
-import { updateVendorProfileSchema, type UpdateVendorProfileSchema } from '@/schemas/profile';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { placeLabel } from '@/lib/referenceLabel';
+import { createProfileSchemas, type UpdateVendorProfileSchema } from '@/schemas/profile';
 import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 export function ProfilePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  useDocumentTitle('profile.title');
+  const isAr = i18n.language.startsWith('ar');
+  const { updateVendorProfileSchema } = useMemo(() => createProfileSchemas(t), [t]);
+  const profileResolver = useLocalizedResolver(updateVendorProfileSchema);
   const { data: profile, isLoading: profileLoading } = useGetVendorProfileQuery();
   const { data: regionsData } = useGetSaudiRegionsQuery();
   const [updateProfile, { isLoading }] = useUpdateVendorProfileMutation();
@@ -38,7 +44,7 @@ export function ProfilePage() {
     reset,
     formState: { errors },
   } = useForm<UpdateVendorProfileSchema>({
-    resolver: yupResolver(updateVendorProfileSchema) as never,
+    resolver: profileResolver,
     defaultValues: {
       business_name: '',
       bio: '',
@@ -63,8 +69,9 @@ export function ProfilePage() {
     if (!profile?.region_id) return null;
     const region = regionsData?.data.find((r) => r.id === profile.region_id);
     const city = region?.cities.find((c) => c.id === profile.city_id);
-    return [region?.name, city?.name].filter(Boolean).join(', ');
-  }, [profile, regionsData]);
+    if (!region) return null;
+    return [region, city].filter(Boolean).map((item) => placeLabel(item!, isAr)).join(', ');
+  }, [profile, regionsData, isAr]);
 
   async function onSubmit(values: UpdateVendorProfileSchema) {
     await runMutation(() =>

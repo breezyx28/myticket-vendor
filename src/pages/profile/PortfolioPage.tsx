@@ -2,10 +2,12 @@ import { PageHeader, PageShell } from '@/components/layout';
 import { SectionSkeleton } from '@/components/ui/SectionSkeleton';
 import { VendorPortfolioSection } from '@/pages/profile/sections/VendorPortfolioSection';
 import { useGetVendorProfileQuery } from '@/api/endpoints';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
 
 export function PortfolioPage() {
   const { t } = useTranslation();
+  useDocumentTitle('portfolio.title');
   const { data: profile, isLoading } = useGetVendorProfileQuery();
 
   if (isLoading || !profile) {

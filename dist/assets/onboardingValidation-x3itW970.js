@@ -1,0 +1,1 @@
+function e(e){let t=e.vendor_application;return t?!!(t.profile_name?.trim()||t.business_name?.trim())&&!!t.contact_email?.trim()&&(t.bio?.trim().length??0)>=25&&(t.documents?.length??0)>0&&(t.gallery?.length??0)>0&&(t.categories?.length??0)>0:!1}export{e as t};

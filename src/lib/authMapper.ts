@@ -6,6 +6,7 @@ import type {
 import type { UserMe } from '@/api/types/user';
 import type { UserRole } from '@/types/domain';
 import { TwoFactorRequiredError } from '@/lib/authErrors';
+import i18n from '@/i18n';
 
 const VALID_ROLES: readonly UserRole[] = ['guest', 'talent', 'vendor', 'organizer'];
 
@@ -69,7 +70,7 @@ export function parseAuthResponse(
   return {
     twoFactor: new TwoFactorRequiredError(
       '__pending__',
-      'Sign-in is incomplete; verification required.',
+      i18n.t('errors.signInIncomplete'),
     ),
   };
 }

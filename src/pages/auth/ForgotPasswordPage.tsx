@@ -2,10 +2,11 @@ import { Button } from '@/components/ui/Button';
 import { Field } from '@/components/forms/Field';
 import { TextInput } from '@/components/forms/TextInput';
 import { useForgotPasswordMutation } from '@/api/endpoints';
-import { forgotPasswordSchema, type ForgotPasswordSchema } from '@/schemas/auth';
+import { createAuthSchemas, type ForgotPasswordSchema } from '@/schemas/auth';
 import { readApiErrorMessage } from '@/lib/apiErrors';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useState } from 'react';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useLocalizedResolver } from '@/hooks/useLocalizedResolver';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -13,15 +14,18 @@ import { toast } from 'sonner';
 
 export function ForgotPasswordPage() {
   const { t } = useTranslation();
+  useDocumentTitle('auth.forgotPasswordTitle');
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
   const [sent, setSent] = useState(false);
+  const { forgotPasswordSchema } = useMemo(() => createAuthSchemas(t), [t]);
+  const forgotPasswordResolver = useLocalizedResolver(forgotPasswordSchema);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ForgotPasswordSchema>({
-    resolver: yupResolver(forgotPasswordSchema),
+    resolver: forgotPasswordResolver,
     defaultValues: { email: '' },
   });
 

@@ -10,13 +10,13 @@ import {
 import type { GovernmentIdDocumentType } from '@/api/types/governmentId';
 import { readApiErrorMessage } from '@/lib/apiErrors';
 import { uploadToCdn } from '@/lib/upload';
+import { useLocalizedResolver } from '@/hooks/useLocalizedResolver';
 import {
-  governmentIdVerificationSchema,
+  createGovernmentIdSchemas,
   type GovernmentIdVerificationSchema,
 } from '@/schemas/governmentId';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { AlertCircle, CheckCircle2, Clock, Loader2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -61,7 +61,7 @@ function ImagePreview({ url, label }: { url: string | null | undefined; label: s
   if (!url) return null;
   return (
     <figure className="space-y-1">
-      <img src={url} alt="" className="h-24 w-full rounded-xl border border-ink-10 object-cover" />
+      <img src={url} alt={label} className="h-24 w-full rounded-xl border border-ink-10 object-cover" />
       <figcaption className="text-[11px] font-medium text-ink-40">{label}</figcaption>
     </figure>
   );
@@ -69,6 +69,8 @@ function ImagePreview({ url, label }: { url: string | null | undefined; label: s
 
 export function GovernmentIdVerificationPanel() {
   const { t } = useTranslation();
+  const { governmentIdVerificationSchema } = useMemo(() => createGovernmentIdSchemas(t), [t]);
+  const governmentIdResolver = useLocalizedResolver(governmentIdVerificationSchema);
   const pollIntervalRef = useRef(0);
   const {
     data: submission,
@@ -95,7 +97,7 @@ export function GovernmentIdVerificationPanel() {
     reset,
     formState: { errors },
   } = useForm<GovernmentIdVerificationSchema>({
-    resolver: yupResolver(governmentIdVerificationSchema) as never,
+    resolver: governmentIdResolver,
     defaultValues: {
       document_type: 'national_id',
       document_number: '',
@@ -297,7 +299,7 @@ export function GovernmentIdVerificationPanel() {
                     {required ? ' *' : ''}
                   </p>
                   {url ? (
-                    <img src={url} alt="" className="h-24 w-full rounded-xl border border-ink-10 object-cover" />
+                    <img src={url} alt={label} className="h-24 w-full rounded-xl border border-ink-10 object-cover" />
                   ) : null}
                   <FileUploadButton
                     label={url ? t('governmentId.replaceImage') : t('governmentId.uploadImage')}

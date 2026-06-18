@@ -20,17 +20,18 @@ export function buildVendorCategoryRefMap(
 export function vendorCategoryLabel(
   category: VendorCategoryLabelFields,
   isAr: boolean,
-  fallbackById?: Map<number, VendorCategoryLabelFields>,
+  fallbackById: Map<number, VendorCategoryLabelFields> | undefined,
+  unavailableLabel: string,
 ): string {
   if (isAr && category.name_ar) return category.name_ar;
   if (category.name_en) return category.name_en;
   if (category.slug) return category.slug.replace(/_/g, ' ');
   if (category.service_category_id != null && fallbackById) {
     const ref = fallbackById.get(category.service_category_id);
-    if (ref) return vendorCategoryLabel(ref, isAr);
+    if (ref) return vendorCategoryLabel(ref, isAr, fallbackById, unavailableLabel);
   }
   if (category.service_category_id != null) {
     return `#${category.service_category_id}`;
   }
-  return '—';
+  return unavailableLabel;
 }

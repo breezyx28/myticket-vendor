@@ -5,6 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MyTicket — Vendor</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('i18nextLng') || 'en';
+          var ar = stored.indexOf('ar') === 0;
+          document.documentElement.lang = ar ? 'ar' : 'en';
+          document.documentElement.dir = ar ? 'rtl' : 'ltr';
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

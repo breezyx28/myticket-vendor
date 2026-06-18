@@ -1,0 +1,1 @@
+import{c as e,i as t,o as n}from"./utils-Cm9wGbCz.js";var r=e(n(),1);function i(e){let{t:n,i18n:i}=t();(0,r.useEffect)(()=>{let t=n(e);document.title=n(`meta.pageTitle`,{page:t})},[n,e,i.language])}export{i as t};

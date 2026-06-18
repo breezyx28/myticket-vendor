@@ -1,9 +1,13 @@
 import { Toaster as SonnerToaster } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export function AppToaster() {
+  const { i18n } = useTranslation();
+  const isRtl = i18n.language.startsWith('ar');
+
   return (
     <SonnerToaster
-      position="top-right"
+      position={isRtl ? 'top-left' : 'top-right'}
       richColors
       closeButton
       duration={4000}

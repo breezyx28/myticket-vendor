@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import {
+import { createApplicationSchemas } from '@/schemas/application';
+import { testT } from '@/schemas/testI18n';
+
+const {
   createVendorApplicationSchema,
   vendorApplicationPatchSchema,
   vendorDocumentSchema,
   vendorGalleryItemSchema,
-} from '@/schemas/application';
+} = createApplicationSchemas(testT);
 
 describe('createVendorApplicationSchema', () => {
   it('requires profile_name on create (not business_name)', async () => {

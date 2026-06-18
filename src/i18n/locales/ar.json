@@ -10,7 +10,9 @@
     "back": "رجوع",
     "continue": "متابعة",
     "signOut": "تسجيل الخروج",
-    "language": "اللغة"
+    "language": "اللغة",
+    "selectNone": "اختر…",
+    "notAvailable": "—"
   },
   "nav": {
     "home": "الرئيسية",
@@ -44,7 +46,16 @@
     "accessDeniedTitle": "الوصول مرفوض",
     "accessDeniedBody": "هذه اللوحة مخصصة لمقدّمي طلبات الموردين ومقدّمي الخدمات المعتمدين فقط.",
     "backToMain": "العودة إلى MyTicket",
-    "mainHandoffHint": "تم توجيهك من MyTicket. سجّل الدخول بنفس الحساب لمتابعة طلب المورد أو لوحة التحكم."
+    "mainHandoffHint": "تم توجيهك من MyTicket. سجّل الدخول بنفس الحساب لمتابعة طلب المورد أو لوحة التحكم.",
+    "twoFactorRequired": "مطلوب التحقق بخطوتين.",
+    "verificationCode": "رمز التحقق",
+    "resetToken": "رمز إعادة التعيين",
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "oauthMissingCode": "رمز التفويض مفقود من المزود. يرجى محاولة تسجيل الدخول مرة أخرى.",
+    "oauthFailed": "فشل تسجيل الدخول",
+    "oauthFinishing": "جارٍ إتمام تسجيل الدخول عبر {{provider}}…",
+    "oauthVerifying": "جارٍ التحقق من تفويضك لدى المزود.",
+    "oauthTryAgain": "يرجى المحاولة مرة أخرى أو استخدام البريد وكلمة المرور."
   },
   "application": {
     "step_identity": "هوية النشاط",
@@ -77,7 +88,21 @@
     "document_required": "مطلوب مستند تحقق واحد على الأقل.",
     "gallery_required": "أضف صوراً لأعمالك السابقة أو معداتك.",
     "incomplete": "يرجى إكمال جميع الحقول المطلوبة قبل الإرسال.",
-    "categoriesRequired": "اختر فئة خدمة واحدة على الأقل للمتابعة."
+    "categoriesRequired": "اختر فئة خدمة واحدة على الأقل للمتابعة.",
+    "documentFallback": "مستند",
+    "urlPlaceholder": "https://",
+    "status_label_draft": "مسودة",
+    "status_label_submitted": "مُرسَل",
+    "status_label_approved": "موافق عليه",
+    "status_label_rejected": "مرفوض",
+    "status_label_provisioning": "جارٍ الإعداد",
+    "status_label_not_started": "لم يبدأ",
+    "statusPageTitle": "حالة الطلب",
+    "stepProgress": "الخطوة {{current}} من {{total}}",
+    "documentKindFile": "ملف",
+    "documentKindUrl": "رابط",
+    "removeDocument": "إزالة المستند",
+    "removeGalleryPhoto": "إزالة صورة المعرض"
   },
   "profile": {
     "title": "ملفك الشخصي",
@@ -162,7 +187,9 @@
     "status_closed": "مغلق",
     "filterAll": "الكل",
     "viewAttachment": "عرض المرفق",
-    "attachmentReady": "المرفق جاهز."
+    "attachmentReady": "المرفق جاهز.",
+    "organizerFallback": "منظم",
+    "noMessages": "لا توجد رسائل بعد."
   },
   "notifications": {
     "title": "الإشعارات",
@@ -256,6 +283,79 @@
     "forbidden": "ليس لديك صلاحية للقيام بذلك.",
     "notFound": "تعذّر العثور على هذا المورد.",
     "validation": "يرجى تصحيح الحقول المميزة.",
-    "network": "خطأ في الشبكة. تحقق من اتصالك وحاول مرة أخرى."
+    "network": "خطأ في الشبكة. تحقق من اتصالك وحاول مرة أخرى.",
+    "generic": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "invalidCredentials": "بيانات الدخول غير صحيحة. حاول مرة أخرى.",
+    "tooManyAttempts": "محاولات كثيرة. حاول بعد قليل.",
+    "unexpectedResponse": "استجابة غير متوقعة من الخادم.",
+    "timeout": "استغرق الخادم وقتاً طويلاً للرد.",
+    "oauthNoRedirect": "لم يُرجع المزود رابط إعادة التوجيه.",
+    "oauthStateMismatch": "عدم تطابق حالة OAuth. حاول تسجيل الدخول مرة أخرى.",
+    "oauthIncomplete": "تعذّر إتمام تسجيل الدخول.",
+    "vendorOnly": "هذه اللوحة مخصصة لحسابات الموردين فقط.",
+    "signInIncomplete": "تسجيل الدخول غير مكتمل؛ مطلوب تحقق."
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "switchAria": "تبديل اللغة"
+  },
+  "meta": {
+    "appTitle": "MyTicket — مورد",
+    "pageTitle": "{{page}} — MyTicket مورد"
+  },
+  "brand": {
+    "eyebrow": "لوحة الموردين",
+    "name": "MyTicket مورد",
+    "role": "مورد"
+  },
+  "accessibility": {
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة",
+    "closeOverlay": "إغلاق الطبقة",
+    "starsRating": "{{count}} نجوم",
+    "profileImageAlt": "صورة الملف الشخصي",
+    "governmentIdImageAlt": "صورة الهوية الحكومية",
+    "attachFile": "إرفاق ملف",
+    "noProfileImage": "لا توجد صورة للملف الشخصي",
+    "uploadDocument": "رفع مستند",
+    "uploadGallery": "رفع صورة للمعرض"
+  },
+  "upload": {
+    "failed": "فشل الرفع.",
+    "noUrl": "استجابة الرفع لم تتضمن رابطاً."
+  },
+  "validation": {
+    "email": "أدخل بريداً إلكترونياً صالحاً.",
+    "emailRequired": "البريد الإلكتروني مطلوب.",
+    "passwordRequired": "كلمة المرور مطلوبة.",
+    "passwordMin": "يجب أن تكون كلمة المرور 8 أحرف على الأقل.",
+    "passwordMax": "كلمة المرور طويلة جداً.",
+    "passwordMatch": "كلمتا المرور غير متطابقتين.",
+    "confirmPassword": "أكد كلمة المرور الجديدة.",
+    "currentPassword": "أدخل كلمة المرور الحالية.",
+    "resetTokenRequired": "رمز إعادة التعيين مطلوب.",
+    "verificationCodeRequired": "رمز التحقق مطلوب.",
+    "newEmailRequired": "البريد الجديد مطلوب.",
+    "fullNameMin": "يجب أن يكون الاسم الكامل حرفين على الأقل.",
+    "businessNameRequired": "اسم النشاط مطلوب.",
+    "businessNameMax": "الحد الأقصى {{max}} حرفاً.",
+    "contactEmailRequired": "بريد التواصل مطلوب.",
+    "phoneInvalid": "أدخل رقماً هاتفياً صالحاً.",
+    "bioMin": "يجب أن تكون النبذة {{min}} حرفاً على الأقل.",
+    "urlInvalid": "يجب أن يكون رابطاً صالحاً.",
+    "urlRequired": "الرابط مطلوب.",
+    "imageUrlRequired": "رابط الصورة مطلوب.",
+    "documentKindRequired": "نوع المستند مطلوب.",
+    "documentKindInvalid": "يجب أن يكون النوع رابطاً أو مستنداً.",
+    "messageEmpty": "لا يمكن أن تكون الرسالة فارغة.",
+    "messageTooLong": "الرسالة طويلة جداً.",
+    "messageRequired": "الرسالة مطلوبة.",
+    "attachmentUrlInvalid": "يجب أن يكون المرفق رابطاً صالحاً.",
+    "reasonTooLong": "السبب طويل جداً.",
+    "documentTypeRequired": "نوع الوثيقة مطلوب.",
+    "documentTypeInvalid": "اختر نوع الوثيقة.",
+    "imageRequired": "هذه الصورة مطلوبة.",
+    "patchProfileName": "استخدم business_name في PATCH وليس profile_name."
   }
 }

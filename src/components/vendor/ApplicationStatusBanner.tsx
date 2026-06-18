@@ -31,11 +31,13 @@ export function ApplicationStatusBanner({
 }) {
   const { t } = useTranslation();
   const body = message ?? (STATUS_KEY[status] ? t(STATUS_KEY[status]) : status);
+  const statusLabelKey = `application.status_label_${status}` as const;
+  const pillLabel = t(statusLabelKey, { defaultValue: status });
 
   return (
     <div className={cn('rounded-2xl border p-5', BANNER_CLASS[status] ?? BANNER_CLASS.draft, className)}>
       <div className="flex flex-wrap items-center gap-3">
-        <StatusPill status={status} label={status} kind="application" />
+        <StatusPill status={status} label={pillLabel} kind="application" />
         <p className="text-[14px] font-medium text-ink">{body}</p>
       </div>
       {children ? <div className="mt-4">{children}</div> : null}

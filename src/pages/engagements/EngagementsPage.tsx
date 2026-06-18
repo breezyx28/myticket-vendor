@@ -8,12 +8,14 @@ import { AlertBanner, PageHeader, PageShell, SectionCard } from '@/components/la
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useListEngagementsQuery } from '@/api/endpoints';
 import { useEngagementActions } from '@/hooks/useEngagementActions';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export function EngagementsPage() {
   const { t } = useTranslation();
+  useDocumentTitle('engagements.title');
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const focusId = searchParams.get('focus');

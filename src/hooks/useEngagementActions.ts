@@ -6,12 +6,16 @@ import {
 } from '@/api/endpoints';
 import { readApiErrorMessage } from '@/lib/apiErrors';
 import { uploadToCdn } from '@/lib/upload';
-import { declineEngagementSchema, engagementMessageSchema } from '@/schemas/engagement';
-import { useCallback, useState } from 'react';
+import { createEngagementSchemas } from '@/schemas/engagement';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export function useEngagementActions() {
   const { t } = useTranslation();
+  const { engagementMessageSchema, declineEngagementSchema } = useMemo(
+    () => createEngagementSchemas(t),
+    [t],
+  );
   const [actionError, setActionError] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [attachmentUrl, setAttachmentUrl] = useState('');
@@ -51,7 +55,7 @@ export function useEngagementActions() {
         setActionError(readApiErrorMessage(err, t('common.error')));
       }
     },
-    [declineEngagement, declineReason, t],
+    [declineEngagement, declineEngagementSchema, declineReason, t],
   );
 
   const onAttachFile = useCallback(
@@ -92,7 +96,7 @@ export function useEngagementActions() {
         );
       }
     },
-    [attachmentUrl, message, postMessage, t],
+    [attachmentUrl, engagementMessageSchema, message, postMessage, t],
   );
 
   const onComplete = useCallback(

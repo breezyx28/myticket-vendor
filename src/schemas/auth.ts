@@ -1,91 +1,109 @@
 import * as yup from 'yup';
+import type { TFunction } from 'i18next';
 
-export const loginSchema = yup
-  .object({
-    email: yup
-      .string()
-      .trim()
-      .email('Enter a valid email.')
-      .required('Email is required.'),
-    password: yup.string().required('Password is required.'),
-  })
-  .strict();
+export function createAuthSchemas(t: TFunction) {
+  const password = yup
+    .string()
+    .min(8, t('validation.passwordMin'))
+    .max(128, t('validation.passwordMax'))
+    .required(t('validation.passwordRequired'));
 
-export type LoginSchema = yup.InferType<typeof loginSchema>;
+  const loginSchema = yup
+    .object({
+      email: yup
+        .string()
+        .trim()
+        .email(t('validation.email'))
+        .required(t('validation.emailRequired')),
+      password: yup.string().required(t('validation.passwordRequired')),
+    })
+    .strict();
 
-export const forgotPasswordSchema = yup
-  .object({
-    email: yup
-      .string()
-      .trim()
-      .email('Enter a valid email.')
-      .required('Email is required.'),
-  })
-  .strict();
+  const forgotPasswordSchema = yup
+    .object({
+      email: yup
+        .string()
+        .trim()
+        .email(t('validation.email'))
+        .required(t('validation.emailRequired')),
+    })
+    .strict();
 
-export type ForgotPasswordSchema = yup.InferType<typeof forgotPasswordSchema>;
+  const resetPasswordSchema = yup
+    .object({
+      token: yup.string().trim().required(t('validation.resetTokenRequired')),
+      password: password,
+      password_confirmation: yup
+        .string()
+        .oneOf([yup.ref('password')], t('validation.passwordMatch'))
+        .required(t('validation.confirmPassword')),
+    })
+    .strict();
 
-export const resetPasswordSchema = yup
-  .object({
-    token: yup.string().trim().required('Reset token is required.'),
-    password: yup
-      .string()
-      .min(8, 'Password must be at least 8 characters.')
-      .max(128, 'Password is too long.')
-      .required('Password is required.'),
-    password_confirmation: yup
-      .string()
-      .oneOf([yup.ref('password')], 'Passwords must match.')
-      .required('Confirm your new password.'),
-  })
-  .strict();
+  const otpVerificationSchema = yup
+    .object({
+      otp: yup.string().trim().required(t('validation.verificationCodeRequired')),
+    })
+    .strict();
 
-export type ResetPasswordSchema = yup.InferType<typeof resetPasswordSchema>;
+  const changePasswordSchema = yup
+    .object({
+      current_password: yup
+        .string()
+        .min(1, t('validation.currentPassword'))
+        .required(t('validation.currentPassword')),
+      new_password: password,
+      new_password_confirmation: yup
+        .string()
+        .oneOf([yup.ref('new_password')], t('validation.passwordMatch'))
+        .required(t('validation.confirmPassword')),
+    })
+    .strict();
 
-const password = yup
-  .string()
-  .min(8, 'Password must be at least 8 characters.')
-  .max(128, 'Password is too long.')
-  .required('Password is required.');
+  const changeEmailSchema = yup
+    .object({
+      new_email: yup
+        .string()
+        .trim()
+        .email(t('validation.email'))
+        .required(t('validation.newEmailRequired')),
+      current_password: yup
+        .string()
+        .min(1, t('validation.currentPassword'))
+        .required(t('validation.currentPassword')),
+    })
+    .strict();
 
-export const changePasswordSchema = yup
-  .object({
-    current_password: yup
-      .string()
-      .min(1, 'Enter your current password.')
-      .required('Enter your current password.'),
-    new_password: password,
-    new_password_confirmation: yup
-      .string()
-      .oneOf([yup.ref('new_password')], 'Passwords must match.')
-      .required('Confirm your new password.'),
-  })
-  .strict();
+  const updateAccountSchema = yup
+    .object({
+      full_name: yup
+        .string()
+        .trim()
+        .min(2, t('validation.fullNameMin'))
+        .max(120)
+        .notRequired(),
+      display_name: yup.string().trim().max(120).nullable().notRequired(),
+      phone: yup.string().trim().max(20).nullable().notRequired(),
+    })
+    .strict();
 
-export type ChangePasswordSchema = yup.InferType<typeof changePasswordSchema>;
+  return {
+    loginSchema,
+    otpVerificationSchema,
+    forgotPasswordSchema,
+    resetPasswordSchema,
+    changePasswordSchema,
+    changeEmailSchema,
+    updateAccountSchema,
+  };
+}
 
-export const changeEmailSchema = yup
-  .object({
-    new_email: yup
-      .string()
-      .trim()
-      .email('Enter a valid email address.')
-      .required('New email is required.'),
-    current_password: yup
-      .string()
-      .min(1, 'Enter your current password.')
-      .required('Enter your current password.'),
-  })
-  .strict();
+type AuthSchemas = ReturnType<typeof createAuthSchemas>;
 
-export type ChangeEmailSchema = yup.InferType<typeof changeEmailSchema>;
-
-export const updateAccountSchema = yup
-  .object({
-    full_name: yup.string().trim().min(2).max(120).notRequired(),
-    display_name: yup.string().trim().max(120).nullable().notRequired(),
-    phone: yup.string().trim().max(20).nullable().notRequired(),
-  })
-  .strict();
-
-export type UpdateAccountSchema = yup.InferType<typeof updateAccountSchema>;
+export type LoginSchema = yup.InferType<AuthSchemas['loginSchema']>;
+export type OtpVerificationSchema = yup.InferType<AuthSchemas['otpVerificationSchema']>;
+export type ForgotPasswordSchema = yup.InferType<AuthSchemas['forgotPasswordSchema']>;
+export type ResetPasswordSchema = yup.InferType<AuthSchemas['resetPasswordSchema']>;
+export type ChangePasswordSchema = yup.InferType<AuthSchemas['changePasswordSchema']>;
+export type ChangeEmailSchema = yup.InferType<AuthSchemas['changeEmailSchema']>;
+export type UpdateAccountSchema = yup.InferType<AuthSchemas['updateAccountSchema']>;

@@ -27,6 +27,7 @@ export function VendorCategoryPicker({
   isAr: boolean;
 }) {
   const { t } = useTranslation();
+  const unavailableLabel = t('common.notAvailable');
   const [query, setQuery] = useState('');
   const [customName, setCustomName] = useState('');
   const [customNameAr, setCustomNameAr] = useState('');
@@ -35,10 +36,10 @@ export function VendorCategoryPicker({
     const q = query.trim().toLowerCase();
     if (!q) return presets;
     return presets.filter((cat) => {
-      const label = vendorCategoryLabel(cat, isAr).toLowerCase();
+      const label = vendorCategoryLabel(cat, isAr, undefined, unavailableLabel).toLowerCase();
       return label.includes(q) || cat.slug.includes(q);
     });
-  }, [presets, query, isAr]);
+  }, [presets, query, isAr, unavailableLabel]);
 
   const systemPresets = useMemo(
     () => filteredPresets.filter((cat) => !cat.is_custom),
@@ -147,7 +148,7 @@ export function VendorCategoryPicker({
                   )}
                 >
                   {selected ? <Check size={14} strokeWidth={2.5} /> : null}
-                  {vendorCategoryLabel(cat, isAr)}
+                  {vendorCategoryLabel(cat, isAr, undefined, unavailableLabel)}
                 </button>
               );
             })}
@@ -177,7 +178,7 @@ export function VendorCategoryPicker({
                   )}
                 >
                   <Sparkles size={12} className={selected ? 'text-coral' : 'text-ink-40'} />
-                  {vendorCategoryLabel(cat, isAr)}
+                  {vendorCategoryLabel(cat, isAr, undefined, unavailableLabel)}
                 </button>
               );
             })}

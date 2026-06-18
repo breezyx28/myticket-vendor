@@ -4,6 +4,7 @@ import { StatusPill } from '@/components/vendor/StatusPill';
 import { useListEngagementMessagesQuery } from '@/api/endpoints';
 import type { Engagement } from '@/api/types/engagement';
 import { cn } from '@/lib/utils';
+import { formatDateTime } from '@/lib/format';
 import { Paperclip } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -44,7 +45,7 @@ export function EngagementThread({
   posting: boolean;
   completing: boolean;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: fetchedMessages } = useListEngagementMessagesQuery(
     { id: engagement.id },
     { pollingInterval: 30_000 },
@@ -57,8 +58,8 @@ export function EngagementThread({
         <div>
           <h2 className="text-xl font-extrabold tracking-tight text-ink">{engagement.topic}</h2>
           <p className="mt-1 text-[13px] text-ink-40">
-            {engagement.organizer_profile_snapshot?.display_name ?? 'Organizer'} ·{' '}
-            <span dir="ltr">{new Date(engagement.created_at).toLocaleString()}</span>
+            {engagement.organizer_profile_snapshot?.display_name ?? t('engagements.organizerFallback')} ·{' '}
+            <span dir="ltr">{formatDateTime(engagement.created_at, i18n.language)}</span>
           </p>
         </div>
         <StatusPill
@@ -77,7 +78,7 @@ export function EngagementThread({
         <ul className="max-h-[280px] space-y-2 overflow-y-auto pe-1">
           {messages.length === 0 ? (
             <li className="rounded-xl border border-dashed border-ink-20 bg-white px-3 py-6 text-center text-[12px] text-ink-40">
-              —
+              {t('engagements.noMessages')}
             </li>
           ) : (
             messages.map((msg) => (
@@ -108,7 +109,7 @@ export function EngagementThread({
                   className={cn('mt-1 text-[10px]', msg.sender === 'vendor' ? 'text-white/70' : 'text-ink-40')}
                   dir="ltr"
                 >
-                  {new Date(msg.created_at).toLocaleString()}
+                  {formatDateTime(msg.created_at, i18n.language)}
                 </p>
               </li>
             ))
@@ -136,7 +137,10 @@ export function EngagementThread({
                 placeholder={t('engagements.messagePlaceholder')}
                 className="flex-1"
               />
-              <label className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-ink-10 bg-white px-3 text-ink-60 transition-colors hover:bg-ink-5">
+              <label
+                className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-ink-10 bg-white px-3 text-ink-60 transition-colors hover:bg-ink-5"
+                aria-label={t('accessibility.attachFile')}
+              >
                 <Paperclip size={16} />
                 <input
                   type="file"

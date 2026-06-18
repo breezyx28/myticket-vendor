@@ -20,6 +20,7 @@ import { OAUTH_REDIRECT_KEY, OAUTH_STATE_KEY } from '@/lib/oauth';
 import { authErrorMessage, isTwoFactorRequiredError } from '@/lib/authErrors';
 import { normalizeUserMe, parseAuthResponse, pickUserRole } from '@/lib/authMapper';
 import { resolvePostLoginRoute } from '@/lib/resolvePostLoginRoute';
+import i18n from '@/i18n';
 import type { AppDispatch } from '@/store';
 import { useAppDispatch } from '@/store/hooks';
 import {
@@ -146,7 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (provider: 'google' = 'google') => {
       const result = await oauthStartMutation({ provider }).unwrap();
       const url = result.redirect_url;
-      if (!url) throw new Error('Provider did not return a redirect URL.');
+      if (!url) throw new Error(i18n.t('errors.oauthNoRedirect'));
       if (result.state) sessionStorage.setItem(OAUTH_STATE_KEY, result.state);
       else sessionStorage.removeItem(OAUTH_STATE_KEY);
       const here = `${window.location.pathname}${window.location.search}`;
@@ -160,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (provider: string, code: string, state: string | null): Promise<string> => {
       const expected = sessionStorage.getItem(OAUTH_STATE_KEY);
       if (expected && state && expected !== state) {
-        throw new Error('OAuth state mismatch. Try signing in again.');
+        throw new Error(i18n.t('errors.oauthStateMismatch'));
       }
       sessionStorage.removeItem(OAUTH_STATE_KEY);
 
@@ -171,7 +172,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const parsed = parseAuthResponse(response);
 
       if ('twoFactor' in parsed) {
-        throw new Error(parsed.twoFactor.message ?? 'Two-factor authentication is required.');
+        throw new Error(parsed.twoFactor.message ?? i18n.t('auth.twoFactorRequired'));
       }
 
       persistAuthCookies({
@@ -186,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (role === 'organizer' || role === 'talent') {
         clearTokens();
         dispatch(baseApi.util.resetApiState());
-        throw new Error('This dashboard is for vendor accounts only.');
+        throw new Error(i18n.t('errors.vendorOnly'));
       }
 
       return redirectTo;

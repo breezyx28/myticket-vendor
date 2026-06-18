@@ -1,43 +1,18 @@
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
 import { NotificationProvider } from '@/contexts/NotificationProvider';
 import { NAV_GROUPS } from '@/config/nav';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  useGetPreferencesQuery,
-  useUpdatePreferencesMutation,
-} from '@/api/endpoints';
-import type { AppLanguage } from '@/i18n';
 import { cn } from '@/lib/utils';
-import { Building2, Globe, LogOut, Menu, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Building2, LogOut, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet } from 'react-router-dom';
 
 export function VendorShellLayout() {
   const { user, signOut } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const { data: preferences } = useGetPreferencesQuery();
-  const [updatePreferences] = useUpdatePreferencesMutation();
-
-  useEffect(() => {
-    const next = preferences?.language;
-    if ((next === 'en' || next === 'ar') && i18n.language !== next) {
-      void i18n.changeLanguage(next);
-    }
-  }, [i18n, preferences?.language]);
-
-  async function toggleLanguage() {
-    const next: AppLanguage = i18n.language === 'ar' ? 'en' : 'ar';
-    await i18n.changeLanguage(next);
-    try {
-      await updatePreferences({ language: next }).unwrap();
-    } catch {
-      /* language still switched locally */
-    }
-  }
-
-  const displayLang = preferences?.language ?? (i18n.language === 'ar' ? 'ar' : 'en');
 
   return (
     <NotificationProvider>
@@ -48,7 +23,7 @@ export function VendorShellLayout() {
               <button
                 type="button"
                 className="inline-flex shrink-0 rounded-full border border-ink-10 p-2 transition-colors hover:bg-ink-5 md:hidden"
-                aria-label="Open menu"
+                aria-label={t('accessibility.openMenu')}
                 onClick={() => setOpen(true)}
               >
                 <Menu size={20} strokeWidth={2} />
@@ -61,20 +36,13 @@ export function VendorShellLayout() {
                   <Building2 size={18} strokeWidth={2} className="text-ink" />
                 </span>
                 <span className="hidden truncate leading-tight sm:inline">
-                  MyTicket <span className="text-coral">Vendor</span>
+                  {t('brand.name')}
                 </span>
               </NavLink>
             </div>
             <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <NotificationBell />
-              <button
-                type="button"
-                onClick={() => void toggleLanguage()}
-                className="inline-flex h-10 items-center gap-1.5 rounded-full border border-ink-10 bg-white px-3 text-[13px] font-semibold text-ink-60 transition-colors hover:bg-ink-5 hover:text-ink sm:gap-2 sm:px-4"
-              >
-                <Globe size={16} strokeWidth={2} />
-                <span className="hidden sm:inline">{displayLang === 'ar' ? 'العربية' : 'EN'}</span>
-              </button>
+              <LanguageSwitcher />
               <button
                 type="button"
                 onClick={() => void signOut()}
@@ -96,11 +64,11 @@ export function VendorShellLayout() {
             )}
           >
             <div className="mb-4 flex items-center justify-between md:hidden">
-              <p className="text-sm font-bold">{t('common.language')}</p>
+              <LanguageSwitcher variant="segmented" />
               <button
                 type="button"
                 className="rounded-full p-2 transition-colors hover:bg-ink-5"
-                aria-label="Close menu"
+                aria-label={t('accessibility.closeMenu')}
                 onClick={() => setOpen(false)}
               >
                 <X size={20} />
@@ -142,7 +110,7 @@ export function VendorShellLayout() {
               {user?.email ? (
                 <div className="rounded-2xl border border-ink-10 bg-ink-5/50 px-3 py-2.5">
                   <p className="truncate text-[12px] font-semibold text-ink">{user.email}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-ink-40">Vendor</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wide text-ink-40">{t('brand.role')}</p>
                 </div>
               ) : null}
               <button
@@ -168,7 +136,7 @@ export function VendorShellLayout() {
           <button
             type="button"
             className="fixed inset-0 z-30 bg-ink/40 md:hidden"
-            aria-label="Close overlay"
+            aria-label={t('accessibility.closeOverlay')}
             onClick={() => setOpen(false)}
           />
         ) : null}

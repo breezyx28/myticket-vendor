@@ -1,12 +1,14 @@
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { ENV } from '@/config/env';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 export function AccessDeniedPage() {
   const { signOut, user } = useAuth();
   const { t } = useTranslation();
+  useDocumentTitle('auth.accessDeniedTitle');
 
   return (
     <div className="mx-auto w-full max-w-lg rounded-3xl border border-white/10 bg-ink p-8 text-white shadow-card-xl">

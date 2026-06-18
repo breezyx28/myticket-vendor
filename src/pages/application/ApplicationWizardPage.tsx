@@ -18,20 +18,21 @@ import {
   useUpdateVendorApplicationMutation,
 } from '@/api/endpoints';
 import { useVendorCategories } from '@/hooks/useVendorCategories';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useLocalizedResolver } from '@/hooks/useLocalizedResolver';
 import {
   isVendorApplicationReady,
   VENDOR_BIO_MAX_CHARS,
 } from '@/lib/onboardingValidation';
 import { readApiErrorMessage, readApiFieldErrors } from '@/lib/apiErrors';
 import { uploadToCdn } from '@/lib/upload';
+import { placeLabel } from '@/lib/referenceLabel';
 import {
-  createVendorApplicationSchema,
-  vendorApplicationPatchSchema,
+  createApplicationSchemas,
   type CreateVendorApplicationSchema,
   type VendorApplicationPatchSchema,
-} from '@/schemas';
+} from '@/schemas/application';
 import type { VendorApplicationDetail } from '@/types/domain';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { Loader2, Trash2, Upload } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -41,6 +42,13 @@ import { toast } from 'sonner';
 
 const STEPS = ['identity', 'services', 'verification', 'review'] as const;
 
+const STEP_TITLE_KEYS = [
+  'application.step_identity',
+  'application.step_services',
+  'application.step_verification',
+  'application.step_review',
+] as const;
+
 export function ApplicationWizardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -49,6 +57,13 @@ export function ApplicationWizardPage() {
     Math.max(Number(searchParams.get('step') ?? 0), 0),
     STEPS.length - 1,
   );
+  useDocumentTitle(STEP_TITLE_KEYS[stepIndex]);
+  const { createVendorApplicationSchema, vendorApplicationPatchSchema } = useMemo(
+    () => createApplicationSchemas(t),
+    [t],
+  );
+  const identityResolver = useLocalizedResolver(createVendorApplicationSchema);
+  const servicesResolver = useLocalizedResolver(vendorApplicationPatchSchema);
 
   const { data: myApps, isLoading: loadingApps } = useGetMyRoleApplicationsQuery();
   const applicationId = myApps?.vendor?.id;
@@ -91,12 +106,12 @@ export function ApplicationWizardPage() {
   });
 
   const identityForm = useForm<CreateVendorApplicationSchema>({
-    resolver: yupResolver(createVendorApplicationSchema) as never,
+    resolver: identityResolver,
     defaultValues: { profile_name: '', contact_email: '', contact_phone: '', bio: '' },
   });
 
   const servicesForm = useForm<VendorApplicationPatchSchema>({
-    resolver: yupResolver(vendorApplicationPatchSchema) as never,
+    resolver: servicesResolver,
     defaultValues: { business_name: '', city: undefined, coverage_area: '' },
   });
 
@@ -249,7 +264,7 @@ export function ApplicationWizardPage() {
         body: {
           kind: 'url',
           value: docUrl.trim(),
-          label: docLabel || 'Document',
+          label: docLabel || t('application.documentFallback'),
           position: detail?.vendor_application?.documents?.length ?? 0,
         },
       }).unwrap();
@@ -336,9 +351,14 @@ export function ApplicationWizardPage() {
 
       <div className="rounded-3xl border border-ink-10 bg-white p-6 shadow-card-sm md:p-8">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-xl font-extrabold text-ink">
-            {t(`application.step_${STEPS[stepIndex]}` as 'application.step_identity')}
-          </h2>
+          <div>
+            <h2 className="text-xl font-extrabold text-ink">
+              {t(`application.step_${STEPS[stepIndex]}` as 'application.step_identity')}
+            </h2>
+            <p className="mt-1 text-[12px] font-medium text-ink-40">
+              {t('application.stepProgress', { current: stepIndex + 1, total: STEPS.length })}
+            </p>
+          </div>
           <span className="text-[12px] font-medium text-ink-40">
             {saveState === 'saving'
               ? t('common.saving')
@@ -389,10 +409,10 @@ export function ApplicationWizardPage() {
             </Field>
             <Field label={t('application.city')}>
               <Select {...servicesForm.register('city', { valueAsNumber: true })}>
-                <option value="">—</option>
+                <option value="">{t('common.selectNone')}</option>
                 {cities.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {placeLabel(c, isAr)}
                   </option>
                 ))}
               </Select>
@@ -442,14 +462,17 @@ export function ApplicationWizardPage() {
                 <TextInput
                   value={docUrl}
                   onChange={(e) => setDocUrl(e.target.value)}
-                  placeholder="https://"
+                  placeholder={t('application.urlPlaceholder')}
                   dir="ltr"
                   className="min-w-[200px] flex-1"
                 />
                 <Button type="button" variant="outline" size="sm" onClick={() => void onAddDocumentUrl()}>
                   {t('application.addUrl')}
                 </Button>
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-ink-10 bg-white px-3 py-2 text-[12px] font-semibold hover:bg-ink-5">
+                <label
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-ink-10 bg-white px-3 py-2 text-[12px] font-semibold hover:bg-ink-5"
+                  aria-label={t('accessibility.uploadDocument')}
+                >
                   <Upload size={14} />
                   {t('application.uploadFile')}
                   <input
@@ -468,11 +491,16 @@ export function ApplicationWizardPage() {
                 {documents.map((item) => (
                   <li key={item.id} className="flex items-center justify-between gap-3 rounded-xl border border-ink-10 bg-white px-3 py-2 text-[12px]">
                     <span className="truncate font-medium text-ink">
-                      {item.label ?? item.kind}: {item.value}
+                      {item.label ??
+                        (item.kind === 'url'
+                          ? t('application.documentKindUrl')
+                          : t('application.documentKindFile'))}
+                      : {item.value}
                     </span>
                     <button
                       type="button"
                       className="rounded-full p-1.5 text-coral hover:bg-coral/10"
+                      aria-label={t('application.removeDocument')}
                       onClick={() =>
                         effectiveId &&
                         void deleteDocument({ id: effectiveId, docId: item.id }).then(() => refetchDetail())
@@ -487,7 +515,10 @@ export function ApplicationWizardPage() {
 
             <div className="rounded-2xl border border-ink-10 bg-ink-5/40 p-4">
               <p className="text-[12px] font-semibold text-ink-60">{t('application.gallery')}</p>
-              <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full border border-ink-10 bg-white px-3 py-2 text-[12px] font-semibold hover:bg-ink-5">
+              <label
+                className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full border border-ink-10 bg-white px-3 py-2 text-[12px] font-semibold hover:bg-ink-5"
+                aria-label={t('accessibility.uploadGallery')}
+              >
                 <Upload size={14} />
                 {t('application.uploadGallery')}
                 <input
@@ -503,12 +534,17 @@ export function ApplicationWizardPage() {
               </label>
               {uploading ? <Loader2 size={18} className="ms-2 inline animate-spin text-ink-40" /> : null}
               <div className="mt-4 grid grid-cols-3 gap-2">
-                {gallery.map((item) => (
+                {gallery.map((item, index) => (
                   <div key={item.id} className="relative">
-                    <img src={item.image_url} alt={item.caption ?? ''} className="aspect-square rounded-xl object-cover" />
+                    <img
+                      src={item.image_url}
+                      alt={item.caption ?? t('portfolio.galleryPhotoAlt', { index: index + 1 })}
+                      className="aspect-square rounded-xl object-cover"
+                    />
                     <button
                       type="button"
                       className="absolute end-1 top-1 rounded-full bg-white/90 p-1 text-coral"
+                      aria-label={t('application.removeGalleryPhoto')}
                       onClick={() =>
                         effectiveId &&
                         void deleteGalleryItem({ id: effectiveId, itemId: item.id }).then(() => refetchDetail())

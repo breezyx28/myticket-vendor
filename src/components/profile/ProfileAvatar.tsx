@@ -1,8 +1,9 @@
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export function ProfileAvatar({
   src,
-  alt = '',
+  alt,
   size = 'md',
   className,
 }: {
@@ -11,6 +12,8 @@ export function ProfileAvatar({
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }) {
+  const { t } = useTranslation();
+  const imageAlt = alt ?? t('accessibility.profileImageAlt');
   const sizeClass = {
     sm: 'h-20 w-20 rounded-2xl',
     md: 'h-28 w-28 rounded-3xl',
@@ -21,7 +24,7 @@ export function ProfileAvatar({
     return (
       <img
         src={src}
-        alt={alt}
+        alt={imageAlt}
         className={cn(sizeClass, 'object-cover ring-2 ring-ink-10', className)}
       />
     );
@@ -31,12 +34,11 @@ export function ProfileAvatar({
     <div
       className={cn(
         sizeClass,
-        'flex items-center justify-center bg-ink-5 text-ink-40 ring-2 ring-ink-10',
+        'flex items-center justify-center bg-ink-5 text-[11px] font-medium text-ink-40 ring-2 ring-ink-10',
         className,
       )}
-      aria-hidden
-    >
-      —
-    </div>
+      role="img"
+      aria-label={t('accessibility.noProfileImage')}
+    />
   );
 }

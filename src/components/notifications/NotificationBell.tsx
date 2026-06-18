@@ -1,4 +1,5 @@
 import { useNotifications } from '@/hooks/useNotifications';
+import { formatDateTime } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { Bell } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -6,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 export function NotificationBell() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { items, unreadCount, markRead, markAllRead } = useNotifications();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -77,6 +78,9 @@ export function NotificationBell() {
                     >
                       <p className="text-[13px] font-bold text-ink">{n.title}</p>
                       <p className="mt-0.5 text-[12px] text-ink-60">{n.body}</p>
+                      <p className="mt-1 text-[10px] text-ink-40" dir="ltr">
+                        {formatDateTime(n.createdAt, i18n.language)}
+                      </p>
                     </Link>
                   ) : (
                     <button
@@ -86,6 +90,9 @@ export function NotificationBell() {
                     >
                       <p className="text-[13px] font-bold text-ink">{n.title}</p>
                       <p className="mt-0.5 text-[12px] text-ink-60">{n.body}</p>
+                      <p className="mt-1 text-[10px] text-ink-40" dir="ltr">
+                        {formatDateTime(n.createdAt, i18n.language)}
+                      </p>
                     </button>
                   )}
                 </div>

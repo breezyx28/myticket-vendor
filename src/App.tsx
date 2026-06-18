@@ -2,6 +2,7 @@ import { RequireApprovedVendor } from '@/components/auth/RequireApprovedVendor';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { RequireVendorCandidate } from '@/components/auth/RequireVendorCandidate';
 import { PreferencesLanguageSync } from '@/components/i18n/PreferencesLanguageSync';
+import { LanguageQueryInvalidator } from '@/components/i18n/LanguageQueryInvalidator';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AppToaster } from '@/lib/AppToaster';
@@ -78,6 +79,7 @@ export function App() {
   return (
     <AuthProvider>
       <PreferencesLanguageSync />
+      <LanguageQueryInvalidator />
       <AppToaster />
       <Suspense fallback={<RouteFallback />}>
         <Routes>

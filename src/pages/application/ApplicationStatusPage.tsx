@@ -8,6 +8,7 @@ import {
   useWithdrawVendorApplicationMutation,
 } from '@/api/endpoints';
 import { readApiErrorMessage } from '@/lib/apiErrors';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,6 +17,7 @@ import { toast } from 'sonner';
 
 export function ApplicationStatusPage() {
   const { t } = useTranslation();
+  useDocumentTitle('application.statusPageTitle');
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const { data: myApps } = useGetMyRoleApplicationsQuery();

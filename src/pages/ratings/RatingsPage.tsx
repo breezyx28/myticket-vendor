@@ -3,10 +3,13 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { StarsRow } from '@/components/vendor/StarsRow';
 import { useGetVendorProfileQuery, useListVendorRatingsQuery } from '@/api/endpoints';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { formatDate, formatNumber } from '@/lib/format';
 import { useTranslation } from 'react-i18next';
 
 export function RatingsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  useDocumentTitle('ratings.title');
   const { data: profile } = useGetVendorProfileQuery();
   const { data: ratingsPaged, isLoading } = useListVendorRatingsQuery(
     { slug: profile?.slug ?? '', page: 1, per_page: 20 },
@@ -27,7 +30,10 @@ export function RatingsPage() {
                 {t('ratings.average')}
               </p>
               <p className="font-mono text-3xl font-bold tabular-nums text-ink" dir="ltr">
-                {profile.rating_average}
+                {formatNumber(Number(profile.rating_average) || 0, i18n.language, {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })}
               </p>
             </div>
             <StarsRow value={Math.round(Number(profile.rating_average) || 0)} />
@@ -48,7 +54,7 @@ export function RatingsPage() {
                 <StarsRow value={rating.stars} />
                 {rating.created_at ? (
                   <span className="text-[12px] text-ink-40" dir="ltr">
-                    {new Date(rating.created_at).toLocaleDateString()}
+                    {formatDate(rating.created_at, i18n.language)}
                   </span>
                 ) : null}
               </div>

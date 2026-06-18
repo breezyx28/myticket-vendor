@@ -10,7 +10,9 @@
     "back": "Back",
     "continue": "Continue",
     "signOut": "Sign out",
-    "language": "Language"
+    "language": "Language",
+    "selectNone": "Select…",
+    "notAvailable": "—"
   },
   "nav": {
     "home": "Home",
@@ -44,7 +46,16 @@
     "accessDeniedTitle": "Access denied",
     "accessDeniedBody": "This dashboard is for vendor applicants and approved service providers only.",
     "backToMain": "Back to MyTicket",
-    "mainHandoffHint": "You were redirected from MyTicket. Sign in with the same account to continue your vendor application or dashboard."
+    "mainHandoffHint": "You were redirected from MyTicket. Sign in with the same account to continue your vendor application or dashboard.",
+    "twoFactorRequired": "Two-factor authentication is required.",
+    "verificationCode": "Verification code",
+    "resetToken": "Reset token",
+    "confirmPasswordLabel": "Confirm password",
+    "oauthMissingCode": "Missing authorization code from the provider. Please try signing in again.",
+    "oauthFailed": "Sign-in failed",
+    "oauthFinishing": "Finishing {{provider}} sign-in…",
+    "oauthVerifying": "Verifying your authorization with the provider.",
+    "oauthTryAgain": "Please try again or use email and password."
   },
   "application": {
     "step_identity": "Business identity",
@@ -77,7 +88,21 @@
     "document_required": "At least one verification document is required.",
     "gallery_required": "Add photos of your past work or equipment.",
     "incomplete": "Please complete all required fields before submitting.",
-    "categoriesRequired": "Select at least one service category to continue."
+    "categoriesRequired": "Select at least one service category to continue.",
+    "documentFallback": "Document",
+    "urlPlaceholder": "https://",
+    "status_label_draft": "Draft",
+    "status_label_submitted": "Submitted",
+    "status_label_approved": "Approved",
+    "status_label_rejected": "Rejected",
+    "status_label_provisioning": "Provisioning",
+    "status_label_not_started": "Not started",
+    "statusPageTitle": "Application status",
+    "stepProgress": "Step {{current}} of {{total}}",
+    "documentKindFile": "File",
+    "documentKindUrl": "Link",
+    "removeDocument": "Remove document",
+    "removeGalleryPhoto": "Remove gallery photo"
   },
   "profile": {
     "title": "Your profile",
@@ -162,7 +187,9 @@
     "status_closed": "Closed",
     "filterAll": "All",
     "viewAttachment": "View attachment",
-    "attachmentReady": "Attachment ready."
+    "attachmentReady": "Attachment ready.",
+    "organizerFallback": "Organizer",
+    "noMessages": "No messages yet."
   },
   "notifications": {
     "title": "Notifications",
@@ -256,6 +283,79 @@
     "forbidden": "You don't have permission to do that.",
     "notFound": "We couldn't find that resource.",
     "validation": "Please correct the highlighted fields.",
-    "network": "Network error. Check your connection and try again."
+    "network": "Network error. Check your connection and try again.",
+    "generic": "Something went wrong. Please try again.",
+    "invalidCredentials": "Invalid credentials. Please try again.",
+    "tooManyAttempts": "Too many attempts. Try again in a moment.",
+    "unexpectedResponse": "Unexpected server response.",
+    "timeout": "The server took too long to respond.",
+    "oauthNoRedirect": "Provider did not return a redirect URL.",
+    "oauthStateMismatch": "OAuth state mismatch. Try signing in again.",
+    "oauthIncomplete": "We could not finish signing you in.",
+    "vendorOnly": "This dashboard is for vendor accounts only.",
+    "signInIncomplete": "Sign-in is incomplete; verification required."
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "switchAria": "Switch language"
+  },
+  "meta": {
+    "appTitle": "MyTicket — Vendor",
+    "pageTitle": "{{page}} — MyTicket Vendor"
+  },
+  "brand": {
+    "eyebrow": "Vendor Dashboard",
+    "name": "MyTicket Vendor",
+    "role": "Vendor"
+  },
+  "accessibility": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "closeOverlay": "Close overlay",
+    "starsRating": "{{count}} stars",
+    "profileImageAlt": "Profile image",
+    "governmentIdImageAlt": "Government ID image",
+    "attachFile": "Attach file",
+    "noProfileImage": "No profile image",
+    "uploadDocument": "Upload document",
+    "uploadGallery": "Upload gallery photo"
+  },
+  "upload": {
+    "failed": "Upload failed.",
+    "noUrl": "Upload response did not include a URL."
+  },
+  "validation": {
+    "email": "Enter a valid email.",
+    "emailRequired": "Email is required.",
+    "passwordRequired": "Password is required.",
+    "passwordMin": "Password must be at least 8 characters.",
+    "passwordMax": "Password is too long.",
+    "passwordMatch": "Passwords must match.",
+    "confirmPassword": "Confirm your new password.",
+    "currentPassword": "Enter your current password.",
+    "resetTokenRequired": "Reset token is required.",
+    "verificationCodeRequired": "Verification code is required.",
+    "newEmailRequired": "New email is required.",
+    "fullNameMin": "Full name must be at least 2 characters.",
+    "businessNameRequired": "Business name is required.",
+    "businessNameMax": "Maximum {{max}} characters.",
+    "contactEmailRequired": "Contact email is required.",
+    "phoneInvalid": "Enter a valid phone number.",
+    "bioMin": "Bio must be at least {{min}} characters.",
+    "urlInvalid": "Must be a valid URL.",
+    "urlRequired": "URL is required.",
+    "imageUrlRequired": "Image URL is required.",
+    "documentKindRequired": "Document kind is required.",
+    "documentKindInvalid": "Kind must be url or document.",
+    "messageEmpty": "Message cannot be empty.",
+    "messageTooLong": "Message is too long.",
+    "messageRequired": "Message is required.",
+    "attachmentUrlInvalid": "Attachment must be a valid URL.",
+    "reasonTooLong": "Reason is too long.",
+    "documentTypeRequired": "Document type is required.",
+    "documentTypeInvalid": "Select a document type.",
+    "imageRequired": "This image is required.",
+    "patchProfileName": "Use business_name on PATCH, not profile_name."
   }
 }

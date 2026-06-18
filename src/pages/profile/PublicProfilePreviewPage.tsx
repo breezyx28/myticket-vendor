@@ -6,12 +6,15 @@ import { AvailabilityToggle } from '@/components/vendor/AvailabilityToggle';
 import { useGetVendorProfileQuery, useGetVendorServiceCategoriesQuery } from '@/api/endpoints';
 import { buildVendorCategoryRefMap, vendorCategoryLabel } from '@/lib/vendorCategoryLabel';
 import { ENV } from '@/config/env';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { formatNumber } from '@/lib/format';
 import { ExternalLink, Star } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export function PublicProfilePreviewPage() {
   const { t, i18n } = useTranslation();
+  useDocumentTitle('nav.preview');
   const { data: profile, isLoading } = useGetVendorProfileQuery();
   const { data: serviceCategories = [] } = useGetVendorServiceCategoriesQuery();
   const categoryRefMap = useMemo(
@@ -46,7 +49,7 @@ export function PublicProfilePreviewPage() {
           {profile.profile_image_url ? (
             <img
               src={profile.profile_image_url}
-              alt=""
+              alt={t('accessibility.profileImageAlt')}
               className="h-full min-h-[240px] w-full object-cover"
             />
           ) : (
@@ -59,7 +62,11 @@ export function PublicProfilePreviewPage() {
             </div>
             <div className="mt-3 flex items-center gap-2 text-[14px] font-semibold text-ink" dir="ltr">
               <Star size={16} className="fill-lemon text-lemon" />
-              {profile.rating_average} · {t('ratings.count', { count: profile.rating_count })}
+              {formatNumber(Number(profile.rating_average) || 0, i18n.language, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })}{' '}
+              · {t('ratings.count', { count: profile.rating_count })}
             </div>
             {profile.coverage_area ? (
               <p className="mt-2 text-[13px] text-ink-60">{profile.coverage_area}</p>
@@ -70,7 +77,7 @@ export function PublicProfilePreviewPage() {
             <div className="mt-4 flex flex-wrap gap-2">
               {profile.categories?.map((c) => (
                 <Badge key={c.id} variant="success">
-                  {vendorCategoryLabel(c, isAr, categoryRefMap)}
+                  {vendorCategoryLabel(c, isAr, categoryRefMap, t('common.notAvailable'))}
                 </Badge>
               ))}
             </div>
@@ -82,7 +89,7 @@ export function PublicProfilePreviewPage() {
               <img
                 key={item.id}
                 src={item.image_url}
-                alt={item.caption ?? ''}
+                alt={item.caption ?? t('portfolio.galleryPhotoAlt', { index: item.position + 1 })}
                 className="aspect-square rounded-2xl object-cover"
               />
             ))}

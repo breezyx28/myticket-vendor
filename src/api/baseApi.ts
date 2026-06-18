@@ -7,6 +7,8 @@ import {
 } from '@reduxjs/toolkit/query/react';
 import { clearTokens, getToken } from '@/api/authToken';
 import { ENV } from '@/config/env';
+import i18n from '@/i18n';
+import { apiLanguageHeader } from '@/lib/locale';
 
 function joinUrl(base: string, prefix: string): string {
   const left = base.endsWith('/') ? base.slice(0, -1) : base;
@@ -41,6 +43,7 @@ const rawBaseQuery = fetchBaseQuery({
     const token = getToken();
     if (token) headers.set('Authorization', `Bearer ${token}`);
     headers.set('Accept', 'application/json');
+    headers.set('Accept-Language', apiLanguageHeader(i18n.language));
     return headers;
   },
 });

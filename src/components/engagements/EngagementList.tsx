@@ -3,6 +3,7 @@ import { LoadingState } from '@/components/ui/LoadingState';
 import { StatusPill } from '@/components/vendor/StatusPill';
 import type { Engagement } from '@/api/types/engagement';
 import { cn } from '@/lib/utils';
+import { formatDateTime } from '@/lib/format';
 import { useTranslation } from 'react-i18next';
 
 export function EngagementList({
@@ -18,7 +19,7 @@ export function EngagementList({
   isError?: boolean;
   onSelect: (engagement: Engagement) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   if (isLoading) return <LoadingState className="text-[13px] text-ink-40" />;
   if (isError) return <p className="text-[13px] font-medium text-coral">{t('common.error')}</p>;
@@ -40,7 +41,7 @@ export function EngagementList({
           >
             <div className="flex items-start justify-between gap-2">
               <p className="font-bold text-ink">
-                {e.organizer_profile_snapshot?.display_name ?? e.topic}
+                {e.organizer_profile_snapshot?.display_name ?? t('engagements.organizerFallback')}
               </p>
               <StatusPill
                 status={e.status}
@@ -49,7 +50,7 @@ export function EngagementList({
             </div>
             <p className="mt-1 line-clamp-2 text-[12px] text-ink-60">{e.preview || e.topic}</p>
             <p className="mt-2 text-[11px] text-ink-40" dir="ltr">
-              {new Date(e.last_message_at).toLocaleString()}
+              {formatDateTime(e.last_message_at, i18n.language)}
             </p>
           </button>
         </li>

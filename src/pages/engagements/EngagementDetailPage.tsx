@@ -4,12 +4,15 @@ import { Button } from '@/components/ui/Button';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { useListEngagementsQuery } from '@/api/endpoints';
 import { useEngagementActions } from '@/hooks/useEngagementActions';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { ChevronLeft } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 
 export function EngagementDetailPage() {
   const { t } = useTranslation();
+  useDocumentTitle('engagements.title');
   const { id } = useParams<{ id: string }>();
   const { data: engagementsPaged, isLoading } = useListEngagementsQuery({ page: 1, per_page: 50 });
   const actions = useEngagementActions();
@@ -42,8 +45,12 @@ export function EngagementDetailPage() {
 
   return (
     <PageShell spacing={6} className="lg:hidden">
-      <Link to="/engagements" className="text-[13px] font-semibold text-coral hover:underline">
-        ← {t('common.back')}
+      <Link
+        to="/engagements"
+        className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-coral hover:underline"
+      >
+        <ChevronLeft size={16} className="rtl:rotate-180" strokeWidth={2} />
+        {t('common.back')}
       </Link>
       {actions.actionError ? <AlertBanner variant="error">{actions.actionError}</AlertBanner> : null}
       <SectionCard>
