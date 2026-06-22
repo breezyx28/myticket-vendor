@@ -17,6 +17,7 @@ const sectionCardVariants = cva('rounded-3xl', {
 });
 
 export function SectionCard({
+  id,
   title,
   hint,
   variant,
@@ -25,6 +26,7 @@ export function SectionCard({
   className,
   contentClassName,
 }: {
+  id?: string;
   title?: ReactNode;
   hint?: ReactNode;
   children: ReactNode;
@@ -35,7 +37,7 @@ export function SectionCard({
   const isPlain = variant === 'plain';
 
   return (
-    <section className={cn(sectionCardVariants({ variant }), className)}>
+    <section id={id} className={cn(sectionCardVariants({ variant }), className)}>
       {title && !isPlain ? (
         <div className="mb-4">
           <SectionHeading title={title} description={hint} />

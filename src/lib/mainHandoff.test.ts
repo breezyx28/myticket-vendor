@@ -16,6 +16,17 @@ describe('mainHandoff', () => {
   it('parses valid emails only', () => {
     expect(parseHandoffEmail(' vendor@example.com ')).toBe('vendor@example.com');
     expect(parseHandoffEmail('not-an-email')).toBeNull();
+    expect(parseHandoffEmail('vendor%40example.com')).toBe('vendor@example.com');
+  });
+
+  it('reads handoff email from query string', () => {
+    const params = new URLSearchParams({
+      source: 'main-website',
+      email: 'emam.malik.commiee%40gmail.com',
+    });
+    const handoff = readMainHandoff(params);
+    expect(handoff.email).toBe('emam.malik.commiee@gmail.com');
+    expect(handoff.fromMainWebsite).toBe(true);
   });
 
   it('builds login URL with redirect param', () => {

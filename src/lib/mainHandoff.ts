@@ -5,9 +5,24 @@ export function isMainWebsiteHandoff(source: string | null | undefined): boolean
 }
 
 export function parseHandoffEmail(value: string | null | undefined): string | null {
-  const email = value?.trim();
-  if (!email || !email.includes('@')) return null;
-  return email;
+  const raw = value?.trim();
+  if (!raw) return null;
+
+  const candidates = [raw];
+  if (raw.includes('%')) {
+    try {
+      candidates.push(decodeURIComponent(raw));
+    } catch {
+      // ignore malformed percent-encoding
+    }
+  }
+
+  for (const candidate of candidates) {
+    const email = candidate.trim();
+    if (email.includes('@')) return email;
+  }
+
+  return null;
 }
 
 export function buildLoginUrl(intendedPath: string): string {

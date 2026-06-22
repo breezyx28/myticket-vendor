@@ -1,7 +1,7 @@
 import { SectionCard } from '@/components/layout';
 import { Button } from '@/components/ui/Button';
 import { LoadingState } from '@/components/ui/LoadingState';
-import { VendorCategoryPicker } from '@/components/vendor/VendorCategoryPicker';
+import { VendorCategoryDropdown } from '@/components/vendor/VendorCategoryDropdown';
 import { useVendorCategories } from '@/hooks/useVendorCategories';
 import type { VendorProfileCategory } from '@/api/types/vendor';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +20,8 @@ export function ProfileCategoriesSection({
     setDraft,
     saving,
     saveCategories,
+    createAndAddCategory,
+    creatingCategory,
   } = useVendorCategories({ mode: 'profile', attached: categories });
 
   return (
@@ -27,12 +29,14 @@ export function ProfileCategoriesSection({
       {loadingPresets ? (
         <LoadingState className="text-[12px] text-ink-40" />
       ) : (
-        <VendorCategoryPicker
+        <VendorCategoryDropdown
           presets={presets}
           value={selection}
           onChange={setDraft}
-          disabled={saving}
+          disabled={saving || creatingCategory}
           isAr={isAr}
+          onCreateCategory={createAndAddCategory}
+          creating={creatingCategory}
         />
       )}
       <Button
@@ -40,6 +44,7 @@ export function ProfileCategoriesSection({
         variant="outline"
         className="mt-4"
         loading={saving}
+        disabled={creatingCategory}
         onClick={() => void saveCategories()}
       >
         {t('categories.save')}

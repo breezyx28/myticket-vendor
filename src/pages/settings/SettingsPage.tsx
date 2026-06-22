@@ -1,9 +1,7 @@
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher';
-import { PageHeader, PageShell, SectionCard, SectionHeading } from '@/components/layout';
-import {
-  SettingsSectionNav,
-  settingsSectionAnchorClass,
-} from '@/components/settings/SettingsSectionNav';
+import { PageHeader, PageShell, SectionCard } from '@/components/layout';
+import { SettingsFormFooter, SettingsSubsection } from '@/components/settings/SettingsFormFooter';
+import { SettingsTabPanel, SettingsTabs, isSettingsTabId, type SettingsTabId } from '@/components/settings/SettingsTabs';
 import { Button } from '@/components/ui/Button';
 import { CheckboxField } from '@/components/ui/CheckboxField';
 import { Field } from '@/components/forms/Field';
@@ -24,20 +22,40 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useLocalizedResolver } from '@/hooks/useLocalizedResolver';
 import { useMutationToast } from '@/hooks/useMutationToast';
 import { formatDateTime } from '@/lib/format';
-import { createAuthSchemas, type ChangeEmailSchema, type ChangePasswordSchema, type UpdateAccountSchema } from '@/schemas/auth';
+import {
+  createAuthSchemas,
+  type ChangeEmailSchema,
+  type ChangePasswordSchema,
+  type UpdateAccountSchema,
+} from '@/schemas/auth';
 import { createProfileSchemas, type UpdatePreferencesSchema } from '@/schemas/profile';
-import { LogOut, Mail } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { Laptop, LogOut, Mail, Monitor, Smartphone } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { cn } from '@/lib/utils';
+import { useSearchParams } from 'react-router-dom';
 
-const sectionPad = 'p-4 sm:p-6';
-const sectionAnchor = settingsSectionAnchorClass();
+function SessionDeviceIcon({ label }: { label: string }) {
+  const lower = label.toLowerCase();
+  if (lower.includes('mobile') || lower.includes('iphone') || lower.includes('android')) {
+    return <Smartphone size={18} strokeWidth={2} className="text-ink-40" aria-hidden />;
+  }
+  if (lower.includes('mac') || lower.includes('windows') || lower.includes('linux')) {
+    return <Laptop size={18} strokeWidth={2} className="text-ink-40" aria-hidden />;
+  }
+  return <Monitor size={18} strokeWidth={2} className="text-ink-40" aria-hidden />;
+}
+
+function resolveTab(param: string | null, showSessions: boolean): SettingsTabId {
+  if (param === 'sessions' && !showSessions) return 'preferences';
+  if (isSettingsTabId(param)) return param;
+  return 'preferences';
+}
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation();
   useDocumentTitle('settings.title');
+  const [searchParams, setSearchParams] = useSearchParams();
   const { signOut } = useAuth();
   const { runMutation } = useMutationToast();
   const { data: me } = useGetMeQuery();
@@ -49,13 +67,25 @@ export function SettingsPage() {
   const [changeEmail, { isLoading: savingEmail }] = useChangeEmailMutation();
   const [revokeSession] = useRevokeSessionMutation();
 
+  const showSessions = sessions.length > 0;
+  const tabFromUrl = resolveTab(searchParams.get('tab'), showSessions);
+  const [activeTab, setActiveTab] = useState<SettingsTabId>(tabFromUrl);
+
+  useEffect(() => {
+    setActiveTab(resolveTab(searchParams.get('tab'), showSessions));
+  }, [searchParams, showSessions]);
+
+  function selectTab(tab: SettingsTabId) {
+    setActiveTab(tab);
+    setSearchParams(tab === 'preferences' ? {} : { tab }, { replace: true });
+  }
+
   const authSchemas = useMemo(() => createAuthSchemas(t), [t]);
   const { updatePreferencesSchema } = useMemo(() => createProfileSchemas(t), [t]);
   const prefsResolver = useLocalizedResolver(updatePreferencesSchema);
   const accountResolver = useLocalizedResolver(authSchemas.updateAccountSchema);
   const passwordResolver = useLocalizedResolver(authSchemas.changePasswordSchema);
   const emailResolver = useLocalizedResolver(authSchemas.changeEmailSchema);
-  const showSessions = sessions.length > 0;
 
   const prefsForm = useForm<UpdatePreferencesSchema>({
     resolver: prefsResolver,
@@ -110,28 +140,24 @@ export function SettingsPage() {
   }, [me, accountForm]);
 
   return (
-    <PageShell spacing={6} className="w-full max-w-4xl">
+    <PageShell spacing={6} className="w-full max-w-3xl">
       <PageHeader title={t('settings.title')} subtitle={t('settings.subtitle')} />
 
-      <div className="sticky top-[72px] z-20 -mx-1 border-b border-ink-10/80 bg-surface-page/95 py-3 backdrop-blur-md lg:static lg:z-auto lg:border-0 lg:bg-transparent lg:py-0 lg:backdrop-blur-none">
-        <SettingsSectionNav showSessions={showSessions} variant="mobile" />
-      </div>
+      <SectionCard variant="plain" className="overflow-hidden rounded-2xl sm:rounded-3xl">
+        <div className="bg-ink-5/30 px-2 pt-2 sm:px-3 sm:pt-3">
+          <SettingsTabs active={activeTab} onChange={selectTab} showSessions={showSessions} />
+        </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] lg:gap-8">
-        <SettingsSectionNav showSessions={showSessions} variant="desktop" />
-
-        <div className="min-w-0 space-y-0">
-          <SectionCard variant="plain" className="overflow-hidden rounded-2xl sm:rounded-3xl">
-            <div id="language" className={cn(sectionPad, sectionAnchor, 'border-b border-ink-10')}>
-              <SectionHeading title={t('settings.language')} description={t('settings.languageHint')} />
-              <div className="mt-4">
-                <LanguageSwitcher variant="segmented" />
-              </div>
+        <div className="p-5 sm:p-8">
+          <SettingsTabPanel id="preferences" active={activeTab}>
+            <div className="mb-6">
+              <h2 className="text-balance text-lg font-extrabold tracking-tight text-ink">
+                {t('settings.preferences')}
+              </h2>
+              <p className="mt-1 text-pretty text-[13px] text-ink-60">{t('settings.preferencesHint')}</p>
             </div>
-
             <form
-              id="preferences"
-              className={cn(sectionPad, sectionAnchor, 'space-y-4 border-b border-ink-10')}
+              className="space-y-8"
               onSubmit={prefsForm.handleSubmit((values) =>
                 runMutation(() =>
                   updatePreferences({
@@ -145,37 +171,61 @@ export function SettingsPage() {
                 ),
               )}
             >
-              <SectionHeading
+              <SettingsSubsection title={t('settings.language')} description={t('settings.languageHint')}>
+                <LanguageSwitcher variant="segmented" />
+              </SettingsSubsection>
+
+              <SettingsSubsection title={t('settings.theme')}>
+                <div className="sm:max-w-xs">
+                  <Select {...prefsForm.register('theme')} aria-invalid={Boolean(prefsForm.formState.errors.theme)}>
+                    <option value="system">{t('settings.themeSystem')}</option>
+                    <option value="light">{t('settings.themeLight')}</option>
+                    <option value="dark">{t('settings.themeDark')}</option>
+                  </Select>
+                  {prefsForm.formState.errors.theme?.message ? (
+                    <p className="mt-1.5 text-[12px] font-medium text-coral">
+                      {prefsForm.formState.errors.theme.message}
+                    </p>
+                  ) : null}
+                </div>
+              </SettingsSubsection>
+
+              <SettingsSubsection
                 title={t('settings.notifications')}
                 description={t('settings.notificationsHint')}
-              />
-              <Field label={t('settings.theme')} error={prefsForm.formState.errors.theme?.message}>
-                <Select {...prefsForm.register('theme')}>
-                  <option value="system">{t('settings.themeSystem')}</option>
-                  <option value="light">{t('settings.themeLight')}</option>
-                  <option value="dark">{t('settings.themeDark')}</option>
-                </Select>
-              </Field>
-              <div className="space-y-3 rounded-2xl border border-ink-10 bg-ink-5/30 p-3 sm:p-4">
-                {(
-                  [
-                    ['email_notifications', t('settings.emailNotifications')],
-                    ['push_notifications', t('settings.pushNotifications')],
-                    ['sms_notifications', t('settings.smsNotifications')],
-                    ['marketing_emails', t('settings.marketingEmails')],
-                  ] as const
-                ).map(([name, label]) => (
-                  <CheckboxField key={name} label={label} {...prefsForm.register(name)} />
-                ))}
-              </div>
-              <Button type="submit" variant="dark" loading={savingPrefs} className="w-full sm:w-auto">
-                {t('settings.savePreferences')}
-              </Button>
-            </form>
+              >
+                <div className="space-y-1 rounded-2xl border border-ink-10 bg-ink-5/30 p-1">
+                  {(
+                    [
+                      ['email_notifications', t('settings.emailNotifications')],
+                      ['push_notifications', t('settings.pushNotifications')],
+                      ['sms_notifications', t('settings.smsNotifications')],
+                      ['marketing_emails', t('settings.marketingEmails')],
+                    ] as const
+                  ).map(([name, label]) => (
+                    <div
+                      key={name}
+                      className="rounded-xl px-3 py-2.5 transition-colors hover:bg-white/80"
+                    >
+                      <CheckboxField label={label} {...prefsForm.register(name)} />
+                    </div>
+                  ))}
+                </div>
+              </SettingsSubsection>
 
+              <SettingsFormFooter label={t('settings.savePreferences')} loading={savingPrefs} />
+            </form>
+          </SettingsTabPanel>
+
+          <SettingsTabPanel id="account" active={activeTab}>
+            <div className="mb-6">
+              <h2 className="text-balance text-lg font-extrabold tracking-tight text-ink">
+                {t('settings.account')}
+              </h2>
+              <p className="mt-1 text-pretty text-[13px] text-ink-60">{t('settings.accountHint')}</p>
+            </div>
             <form
-              id="account"
-              className={cn(sectionPad, sectionAnchor, 'space-y-4 border-b border-ink-10')}
+              className="space-y-5"
               onSubmit={accountForm.handleSubmit((values) =>
                 runMutation(() =>
                   updateMe({
@@ -186,30 +236,47 @@ export function SettingsPage() {
                 ),
               )}
             >
-              <SectionHeading title={t('settings.account')} description={t('settings.accountHint')} />
               {me?.email ? (
-                <p className="inline-flex max-w-full items-start gap-2 break-all text-[14px] font-semibold text-ink sm:items-center">
-                  <Mail size={16} className="mt-0.5 shrink-0 text-ink-40 sm:mt-0" />
-                  <span dir="ltr">{me.email}</span>
-                </p>
+                <div className="flex items-start gap-3 rounded-2xl border border-ink-10 bg-ink-5/40 px-4 py-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-card-sm">
+                    <Mail size={18} className="text-ink-40" aria-hidden />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-ink-40">
+                      {t('auth.email')}
+                    </p>
+                    <p className="mt-1 break-all text-[14px] font-semibold text-ink" dir="ltr">
+                      {me.email}
+                    </p>
+                  </div>
+                </div>
               ) : null}
-              <Field label={t('settings.fullName')} error={accountForm.formState.errors.full_name?.message}>
-                <TextInput {...accountForm.register('full_name')} />
-              </Field>
-              <Field label={t('settings.displayName')} error={accountForm.formState.errors.display_name?.message}>
-                <TextInput {...accountForm.register('display_name')} />
-              </Field>
-              <Field label={t('settings.phone')} error={accountForm.formState.errors.phone?.message}>
-                <TextInput {...accountForm.register('phone')} dir="ltr" />
-              </Field>
-              <Button type="submit" variant="dark" loading={savingAccount} className="w-full sm:w-auto">
-                {t('settings.saveAccount')}
-              </Button>
-            </form>
 
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={t('settings.fullName')} error={accountForm.formState.errors.full_name?.message}>
+                  <TextInput {...accountForm.register('full_name')} />
+                </Field>
+                <Field label={t('settings.displayName')} error={accountForm.formState.errors.display_name?.message}>
+                  <TextInput {...accountForm.register('display_name')} />
+                </Field>
+              </div>
+              <Field label={t('settings.phone')} error={accountForm.formState.errors.phone?.message}>
+                <TextInput {...accountForm.register('phone')} dir="ltr" className="sm:max-w-xs" />
+              </Field>
+
+              <SettingsFormFooter label={t('settings.saveAccount')} loading={savingAccount} />
+            </form>
+          </SettingsTabPanel>
+
+          <SettingsTabPanel id="password" active={activeTab}>
+            <div className="mb-6">
+              <h2 className="text-balance text-lg font-extrabold tracking-tight text-ink">
+                {t('settings.changePassword')}
+              </h2>
+              <p className="mt-1 text-pretty text-[13px] text-ink-60">{t('settings.securityHint')}</p>
+            </div>
             <form
-              id="security"
-              className={cn(sectionPad, sectionAnchor, 'space-y-4 border-b border-ink-10')}
+              className="space-y-5"
               onSubmit={passwordForm.handleSubmit((values) =>
                 runMutation(
                   () =>
@@ -221,7 +288,6 @@ export function SettingsPage() {
                 ),
               )}
             >
-              <SectionHeading title={t('settings.changePassword')} />
               <Field
                 label={t('settings.currentPassword')}
                 error={passwordForm.formState.errors.current_password?.message}
@@ -232,31 +298,39 @@ export function SettingsPage() {
                   autoComplete="current-password"
                 />
               </Field>
-              <Field label={t('settings.newPassword')} error={passwordForm.formState.errors.new_password?.message}>
-                <TextInput
-                  {...passwordForm.register('new_password')}
-                  type="password"
-                  autoComplete="new-password"
-                />
-              </Field>
-              <Field
-                label={t('settings.confirmPassword')}
-                error={passwordForm.formState.errors.new_password_confirmation?.message}
-              >
-                <TextInput
-                  {...passwordForm.register('new_password_confirmation')}
-                  type="password"
-                  autoComplete="new-password"
-                />
-              </Field>
-              <Button type="submit" variant="dark" loading={savingPassword} className="w-full sm:w-auto">
-                {t('settings.updatePassword')}
-              </Button>
-            </form>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={t('settings.newPassword')} error={passwordForm.formState.errors.new_password?.message}>
+                  <TextInput
+                    {...passwordForm.register('new_password')}
+                    type="password"
+                    autoComplete="new-password"
+                  />
+                </Field>
+                <Field
+                  label={t('settings.confirmPassword')}
+                  error={passwordForm.formState.errors.new_password_confirmation?.message}
+                >
+                  <TextInput
+                    {...passwordForm.register('new_password_confirmation')}
+                    type="password"
+                    autoComplete="new-password"
+                  />
+                </Field>
+              </div>
 
+              <SettingsFormFooter label={t('settings.updatePassword')} loading={savingPassword} />
+            </form>
+          </SettingsTabPanel>
+
+          <SettingsTabPanel id="email" active={activeTab}>
+            <div className="mb-6">
+              <h2 className="text-balance text-lg font-extrabold tracking-tight text-ink">
+                {t('settings.changeEmail')}
+              </h2>
+              <p className="mt-1 text-pretty text-[13px] text-ink-60">{t('settings.changeEmailHint')}</p>
+            </div>
             <form
-              id="email"
-              className={cn(sectionPad, sectionAnchor, 'space-y-4', showSessions && 'border-b border-ink-10')}
+              className="space-y-5"
               onSubmit={emailForm.handleSubmit((values) =>
                 runMutation(
                   async () => {
@@ -268,7 +342,6 @@ export function SettingsPage() {
                 ),
               )}
             >
-              <SectionHeading title={t('settings.changeEmail')} description={t('settings.changeEmailHint')} />
               <Field label={t('settings.newEmail')} error={emailForm.formState.errors.new_email?.message}>
                 <TextInput {...emailForm.register('new_email')} type="email" dir="ltr" />
               </Field>
@@ -280,67 +353,83 @@ export function SettingsPage() {
                   {...emailForm.register('current_password')}
                   type="password"
                   autoComplete="current-password"
+                  className="sm:max-w-md"
                 />
               </Field>
-              <Button type="submit" variant="dark" loading={savingEmail} className="w-full sm:w-auto">
-                {t('settings.updateEmail')}
-              </Button>
+
+              <SettingsFormFooter label={t('settings.updateEmail')} loading={savingEmail} />
             </form>
+          </SettingsTabPanel>
 
-            {showSessions ? (
-              <section id="sessions" className={cn(sectionPad, sectionAnchor)}>
-                <SectionHeading title={t('settings.sessions')} />
-                <ul className="mt-4 space-y-2">
-                  {sessions.map((session) => (
-                    <li
-                      key={session.id}
-                      className="flex flex-col gap-3 rounded-xl border border-ink-10 p-3 text-[13px] sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-semibold text-ink">
-                          {session.device_label ?? session.user_agent ?? t('settings.unknownDevice')}
+          <SettingsTabPanel id="sessions" active={activeTab}>
+            <div className="mb-6">
+              <h2 className="text-balance text-lg font-extrabold tracking-tight text-ink">
+                {t('settings.sessions')}
+              </h2>
+              <p className="mt-1 text-pretty text-[13px] text-ink-60">{t('settings.sessionsHint')}</p>
+            </div>
+            <ul className="space-y-2">
+              {sessions.map((session) => (
+                <li
+                  key={session.id}
+                  className="flex flex-col gap-3 rounded-2xl border border-ink-10 bg-ink-5/20 p-4 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-card-sm">
+                      <SessionDeviceIcon label={session.device_label ?? session.user_agent ?? ''} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-ink">
+                        {session.device_label ?? session.user_agent ?? t('settings.unknownDevice')}
+                      </p>
+                      {session.last_active_at ? (
+                        <p className="mt-0.5 tabular-nums text-[11px] text-ink-40" dir="ltr">
+                          {formatDateTime(session.last_active_at, i18n.language)}
                         </p>
-                        {session.last_active_at ? (
-                          <p className="mt-0.5 text-[11px] text-ink-40" dir="ltr">
-                            {formatDateTime(session.last_active_at, i18n.language)}
-                          </p>
-                        ) : null}
-                      </div>
-                      {session.current ? (
-                        <span className="shrink-0 self-start rounded-full bg-mint/15 px-2.5 py-1 text-[11px] font-semibold text-mint-dark sm:self-center">
-                          {t('settings.currentSession')}
-                        </span>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="w-full sm:w-auto"
-                          onClick={() => void revokeSession({ id: session.id })}
-                        >
-                          {t('settings.revoke')}
-                        </Button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-          </SectionCard>
+                      ) : null}
+                    </div>
+                  </div>
+                  {session.current ? (
+                    <span className="shrink-0 self-start rounded-full bg-mint/15 px-3 py-1.5 text-[11px] font-semibold text-mint-dark sm:self-center">
+                      {t('settings.currentSession')}
+                    </span>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="min-h-10 w-full transition-transform active:scale-[0.96] sm:w-auto"
+                      onClick={() => void revokeSession({ id: session.id })}
+                    >
+                      {t('settings.revoke')}
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </SettingsTabPanel>
 
-          <div className="mt-4 sm:mt-6">
-            <Button
-              type="button"
-              variant="dark"
-              className="w-full sm:w-auto"
-              onClick={() => void signOut()}
-            >
-              <LogOut size={16} className="me-2" />
-              {t('common.signOut')}
-            </Button>
-          </div>
+          <SettingsTabPanel id="signout" active={activeTab}>
+            <div className="mb-6">
+              <h2 className="text-balance text-lg font-extrabold tracking-tight text-ink">
+                {t('settings.signOutTitle')}
+              </h2>
+              <p className="mt-1 text-pretty text-[13px] text-ink-60">{t('settings.signOutHint')}</p>
+            </div>
+            <div className="rounded-2xl border border-coral/20 bg-coral/5 p-5 sm:p-6">
+              <Button
+                type="button"
+                variant="danger"
+                className="w-full transition-transform active:scale-[0.96] sm:w-auto"
+                onClick={() => void signOut()}
+              >
+                <LogOut size={16} aria-hidden />
+                {t('common.signOut')}
+              </Button>
+            </div>
+          </SettingsTabPanel>
         </div>
-      </div>
+      </SectionCard>
     </PageShell>
   );
 }

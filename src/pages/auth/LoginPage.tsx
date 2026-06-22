@@ -32,7 +32,7 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
-    reset,
+    setValue,
     formState: { errors },
     getValues,
   } = useForm<LoginSchema>({
@@ -42,8 +42,8 @@ export function LoginPage() {
 
   useEffect(() => {
     if (!handoff.email) return;
-    reset((prev) => ({ ...prev, email: handoff.email ?? prev.email }));
-  }, [handoff.email, reset]);
+    setValue('email', handoff.email, { shouldDirty: false, shouldValidate: false });
+  }, [handoff.email, setValue]);
 
   const otpForm = useForm<OtpVerificationSchema>({
     resolver: otpResolver,

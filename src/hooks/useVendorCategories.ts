@@ -1,4 +1,5 @@
 import {
+  useCreateVendorServiceCategoryMutation,
   useListVendorServiceCategoriesQuery,
   useSyncVendorApplicationCategoriesMutation,
   useSyncVendorProfileCategoriesMutation,
@@ -7,7 +8,11 @@ import type { VendorApplicationCategory } from '@/api/types/roleApplication';
 import type { VendorProfileCategory } from '@/api/types/vendor';
 import {
   attachedCategoriesToSelection,
+  findMatchingPreset,
+  isCategorySelected,
+  presetToSelection,
   selectionToSyncPayload,
+  togglePresetSelection,
   type CategorySelectionItem,
 } from '@/lib/vendorCategorySelection';
 import { useCallback, useMemo, useState } from 'react';
@@ -29,6 +34,8 @@ export function useVendorCategories(input: {
   const [syncProfileCategories, { isLoading: savingProfile }] = useSyncVendorProfileCategoriesMutation();
   const [syncApplicationCategories, { isLoading: savingApplication }] =
     useSyncVendorApplicationCategoriesMutation();
+  const [createVendorServiceCategory, { isLoading: creatingCategory }] =
+    useCreateVendorServiceCategoryMutation();
   const [draft, setDraft] = useState<CategorySelectionItem[] | null>(null);
 
   const serverSelection = useMemo(
@@ -85,6 +92,38 @@ export function useVendorCategories(input: {
     [input.applicationId, input.mode, showError, syncApplicationCategories],
   );
 
+  const createAndAddCategory = useCallback(
+    async (nameEn: string, nameAr?: string): Promise<boolean> => {
+      const trimmed = nameEn.trim();
+      if (!trimmed) return false;
+
+      const current = draft ?? serverSelection;
+      const match = findMatchingPreset(trimmed, presets);
+      if (match) {
+        if (!isCategorySelected(current, match)) {
+          setDraft(togglePresetSelection(current, match));
+        }
+        return true;
+      }
+
+      try {
+        const created = await createVendorServiceCategory({
+          name_en: trimmed,
+          ...(nameAr?.trim() ? { name_ar: nameAr.trim() } : {}),
+        }).unwrap();
+        const next = isCategorySelected(current, created)
+          ? current
+          : [...current, presetToSelection(created)];
+        setDraft(next);
+        return true;
+      } catch (err) {
+        showError(err);
+        return false;
+      }
+    },
+    [createVendorServiceCategory, draft, presets, serverSelection, showError],
+  );
+
   return {
     isAr,
     presets,
@@ -94,6 +133,8 @@ export function useVendorCategories(input: {
     saving,
     saveCategories,
     persistCategories,
+    createAndAddCategory,
+    creatingCategory,
     resetDraft: () => setDraft(null),
   };
 }
