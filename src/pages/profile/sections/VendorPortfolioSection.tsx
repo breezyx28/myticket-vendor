@@ -4,6 +4,7 @@ import { ProfileAvatar } from '@/components/profile/ProfileAvatar';
 import { VendorGalleryEditor } from '@/components/vendor/VendorGalleryEditor';
 import { useVendorProfileUploads } from '@/hooks/useVendorProfileUploads';
 import type { Vendor } from '@/api/types/vendor';
+import { resolveVendorProfileImage } from '@/lib/mediaUrl';
 import { useTranslation } from 'react-i18next';
 
 export function VendorPortfolioSection({ profile }: { profile: Vendor }) {
@@ -22,7 +23,7 @@ export function VendorPortfolioSection({ profile }: { profile: Vendor }) {
     <div className="space-y-6">
       <SectionCard title={t('portfolio.profileImage')} hint={t('portfolio.profileImageHint')}>
         <div className="flex flex-wrap items-center gap-4">
-          <ProfileAvatar src={profile.profile_image_url} size="md" />
+          <ProfileAvatar src={resolveVendorProfileImage(profile)} size="md" />
           <FileUploadButton
             label={t('portfolio.uploadImage')}
             accept="image/*"

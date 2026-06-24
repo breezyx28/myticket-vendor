@@ -5,8 +5,11 @@ export type NotificationKind =
   | 'role_application_rejected'
   | 'government_id_verified'
   | 'government_id_rejected'
+  | 'engagement'
   | 'engagement_message'
   | 'new_engagement'
+  | 'tourism_ad_approved'
+  | 'tourism_ad_rejected'
   | 'general'
   | string;
 

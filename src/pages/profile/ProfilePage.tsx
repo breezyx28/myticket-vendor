@@ -18,6 +18,7 @@ import { useVendorProfileUploads } from '@/hooks/useVendorProfileUploads';
 import { ProfileCategoriesSection } from '@/pages/profile/sections/ProfileCategoriesSection';
 import { ProfilePublicLinkSection } from '@/pages/profile/sections/ProfilePublicLinkSection';
 import { placeLabel } from '@/lib/referenceLabel';
+import { resolveVendorProfileImage } from '@/lib/mediaUrl';
 import { createProfileSchemas, type UpdateVendorProfileSchema } from '@/schemas/profile';
 import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
@@ -95,7 +96,7 @@ export function ProfilePage() {
 
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <div className="space-y-4">
-          <ProfileAvatar src={profile.profile_image_url} size="lg" />
+          <ProfileAvatar src={resolveVendorProfileImage(profile)} size="lg" />
           <FileUploadButton
             label={t('portfolio.uploadImage')}
             accept="image/*"

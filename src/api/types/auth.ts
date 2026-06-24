@@ -3,6 +3,20 @@ import type { UserMe } from '@/api/types/user';
 
 export type OAuthProvider = 'google' | string;
 
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  full_name: string;
+  phone?: string;
+  role: 'vendor';
+}
+
+export interface RegisterResponse extends AuthSuccessResponse {
+  message?: string;
+  user_id?: Id;
+  role?: string;
+}
+
 export interface LoginRequest {
   email?: string;
   phone?: string;

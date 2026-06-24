@@ -5,6 +5,7 @@ import {
   parseHandoffEmail,
   readMainHandoff,
   resolvePostLoginPath,
+  stripSessionHandoffParams,
 } from '@/lib/mainHandoff';
 
 describe('mainHandoff', () => {
@@ -46,5 +47,43 @@ describe('mainHandoff', () => {
     const handoff = readMainHandoff(params);
     expect(handoff.email).toBe('vendor@example.com');
     expect(handoff.redirect).toBe('/application?source=main-website&email=vendor%40example.com');
+  });
+
+  it('reads session token when source is main-website', () => {
+    const params = new URLSearchParams({
+      source: 'main-website',
+      token: '2|abc',
+      expires_at: '2026-06-23T12:00:00+00:00',
+      email: 'vendor@example.com',
+    });
+    const handoff = readMainHandoff(params);
+    expect(handoff.sessionHandoff).toEqual({
+      token: '2|abc',
+      expiresAt: '2026-06-23T12:00:00+00:00',
+      refreshToken: null,
+    });
+  });
+
+  it('ignores token without main-website source', () => {
+    const params = new URLSearchParams({ token: '2|abc' });
+    expect(readMainHandoff(params).sessionHandoff).toBeNull();
+  });
+
+  it('reads session token from nested redirect', () => {
+    const params = new URLSearchParams({
+      redirect: '/login?source=main-website&token=2%7Cxyz&email=v%40e.com',
+    });
+    const handoff = readMainHandoff(params);
+    expect(handoff.sessionHandoff?.token).toBe('2|xyz');
+    expect(handoff.email).toBe('v@e.com');
+  });
+
+  it('strips sensitive session handoff params', () => {
+    expect(
+      stripSessionHandoffParams(
+        '/login',
+        '?source=main-website&token=secret&expires_at=2026-01-01&email=a%40b.com',
+      ),
+    ).toBe('/login?source=main-website&email=a%40b.com');
   });
 });

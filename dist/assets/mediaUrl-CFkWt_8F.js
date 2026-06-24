@@ -1,0 +1,1 @@
+import{dt as e}from"./index-DkxIaTtO.js";function t(e,t){return`${e.endsWith(`/`)?e.slice(0,-1):e}${t.startsWith(`/`)?t:`/${t}`}`}function n(n){let r=n?.trim();return r?/^https?:\/\//i.test(r)?r:r.startsWith(`/`)?t(e.apiBase,r):r:null}function r(e){return e?n(e.profile_image??e.profile_image_url):null}export{r as n,n as t};

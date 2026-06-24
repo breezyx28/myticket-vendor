@@ -9,6 +9,7 @@ import {
   updateGalleryCaption,
   type GalleryEditorItem,
 } from '@/lib/vendorGalleryEditor';
+import { resolveStorageUrl } from '@/lib/mediaUrl';
 import { cn } from '@/lib/utils';
 import { ArrowDown, ArrowUp, GripVertical, ImagePlus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -115,7 +116,7 @@ export function VendorGalleryEditor({
                 <div className="flex gap-3 sm:gap-4">
                   <div className="relative shrink-0">
                     <img
-                      src={item.image_url}
+                      src={resolveStorageUrl(item.image_url) ?? item.image_url}
                       alt={item.caption || t('portfolio.galleryPhotoAlt', { index: index + 1 })}
                       className="h-24 w-24 rounded-2xl object-cover ring-1 ring-ink-10 sm:h-28 sm:w-28"
                     />

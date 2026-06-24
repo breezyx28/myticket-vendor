@@ -8,6 +8,7 @@ import { buildVendorCategoryRefMap, vendorCategoryLabel } from '@/lib/vendorCate
 import { ENV } from '@/config/env';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { formatNumber } from '@/lib/format';
+import { resolveStorageUrl, resolveVendorProfileImage } from '@/lib/mediaUrl';
 import { ExternalLink, Star } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +30,8 @@ export function PublicProfilePreviewPage() {
 
   const publicUrl = `${ENV.mainWebsiteUrl}/vendors/${profile.slug}`;
 
+  const profileImage = resolveVendorProfileImage(profile);
+
   return (
     <PageShell spacing={6}>
       <PageHeader
@@ -46,9 +49,9 @@ export function PublicProfilePreviewPage() {
 
       <SectionCard className="overflow-hidden p-0 shadow-card-md">
         <div className="grid gap-0 md:grid-cols-[240px_1fr]">
-          {profile.profile_image_url ? (
+          {profileImage ? (
             <img
-              src={profile.profile_image_url}
+              src={profileImage}
               alt={t('accessibility.profileImageAlt')}
               className="h-full min-h-[240px] w-full object-cover"
             />
@@ -88,7 +91,7 @@ export function PublicProfilePreviewPage() {
             {profile.gallery.map((item) => (
               <img
                 key={item.id}
-                src={item.image_url}
+                src={resolveStorageUrl(item.image_url) ?? item.image_url}
                 alt={item.caption ?? t('portfolio.galleryPhotoAlt', { index: item.position + 1 })}
                 className="aspect-square rounded-2xl object-cover"
               />

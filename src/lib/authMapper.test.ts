@@ -50,6 +50,27 @@ describe('parseAuthResponse', () => {
       expect(result.twoFactor.challengeToken).toBe('challenge-1');
     }
   });
+
+  it('parses register-shaped 201 payload', () => {
+    const result = parseAuthResponse({
+      message: 'Registered successfully.',
+      user_id: 7,
+      role: 'vendor',
+      token: '2|register-token',
+      refresh_token: null,
+      expires_at: '2026-06-23T12:00:00+00:00',
+      user: {
+        id: 7,
+        email: 'vendor@example.com',
+        full_name: 'Vendor User',
+        role: 'vendor',
+        roles: ['vendor'],
+      },
+    });
+
+    expect('token' in result && result.token).toBe('2|register-token');
+    expect('token' in result && result.user?.email).toBe('vendor@example.com');
+  });
 });
 
 describe('normalizeUserMe', () => {

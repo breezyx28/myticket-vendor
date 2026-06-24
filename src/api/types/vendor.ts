@@ -42,6 +42,7 @@ export interface Vendor {
   region_id: number | null;
   city_id: number | null;
   coverage_area: string | null;
+  profile_image?: string | null;
   profile_image_url: string | null;
   website_url: string | null;
   instagram_handle: string | null;

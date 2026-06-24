@@ -1,6 +1,7 @@
 import { RequireApprovedVendor } from '@/components/auth/RequireApprovedVendor';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { RequireVendorCandidate } from '@/components/auth/RequireVendorCandidate';
+import { SessionHandoffBootstrap } from '@/components/auth/SessionHandoffBootstrap';
 import { PreferencesLanguageSync } from '@/components/i18n/PreferencesLanguageSync';
 import { LanguageQueryInvalidator } from '@/components/i18n/LanguageQueryInvalidator';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
@@ -78,6 +79,7 @@ function RouteFallback() {
 export function App() {
   return (
     <AuthProvider>
+      <SessionHandoffBootstrap>
       <PreferencesLanguageSync />
       <LanguageQueryInvalidator />
       <AppToaster />
@@ -121,6 +123,7 @@ export function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
+      </SessionHandoffBootstrap>
     </AuthProvider>
   );
 }

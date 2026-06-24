@@ -12,6 +12,8 @@ import type {
   OAuthCallbackRequest,
   OAuthProvider,
   OAuthStartResponse,
+  RegisterRequest,
+  RegisterResponse,
   ResetPasswordRequest,
 } from '@/api/types/auth';
 
@@ -19,6 +21,10 @@ export const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     login: build.mutation<LoginResponse, LoginRequest>({
       query: (body) => ({ url: '/auth/login', method: 'POST', body }),
+      invalidatesTags: ['Me'],
+    }),
+    register: build.mutation<RegisterResponse, RegisterRequest>({
+      query: (body) => ({ url: '/auth/register', method: 'POST', body }),
       invalidatesTags: ['Me'],
     }),
     oauthStart: build.mutation<OAuthStartResponse, { provider: OAuthProvider }>({
@@ -60,6 +66,7 @@ export const authApi = baseApi.injectEndpoints({
 
 export const {
   useLoginMutation,
+  useRegisterMutation,
   useOauthStartMutation,
   useOauthCallbackMutation,
   useForgotPasswordMutation,

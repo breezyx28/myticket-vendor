@@ -60,6 +60,7 @@ export interface UserMe {
   full_name: string;
   display_name?: string | null;
   bio?: string | null;
+  profile_image?: string | null;
   profile_image_url?: string | null;
   avatar_url?: string | null;
   email_verified_at?: Iso8601 | null;
@@ -109,6 +110,7 @@ export interface UpdateVendorAvailabilityRequest {
 
 export interface ProfileImageUpload {
   user_id: Id;
+  profile_image?: string;
   profile_image_url: string;
   avatar_url: string;
   content_type: string;
